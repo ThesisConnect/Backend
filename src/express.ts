@@ -70,13 +70,13 @@ app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`)
 }
 )
-mongoose.connection.on('disconnected', () => {
-    console.log('Mongoose default connection disconnected');
-});
+// mongoose.connection.on('disconnected', () => {
+//     console.log('Mongoose default connection disconnected');
+// });
 
-mongoose.connection.on('error', (err) => {
-    console.error('Mongoose encountered an error:', err);
-});
+// mongoose.connection.on('error', (err) => {
+//     console.error('Mongoose encountered an error:', err);
+// });
 
 
 
