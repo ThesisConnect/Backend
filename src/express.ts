@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import ms from 'ms';
 import test from './routers/test';
+import chalk from 'chalk';
+
 // import cors from 'cors';
 
 interface Error {
@@ -25,17 +27,17 @@ const options ={
 const connectWithRetry = () => {
     return mongoose.connect(process.env.DATABASE_URL || '', options)
         .then(() => {
-            console.log('Connected to database');
+            console.log(chalk.greenBright('✔ Connected to database ✔'));
         })
         .catch(err => {
-            console.error('Failed to connect to database:', err);
+            console.error(chalk.redBright('✖ Failed to connect to database:'), err);
             if (retries < MAX_RETRIES) {
                 retries++;
                 const delay = ms('5s');
-                console.log(`Retry in ${delay / 1000}s... (${retries}/${MAX_RETRIES})`);
+                console.warn(chalk.yellow(`⏳ Retry in ${delay / 1000}s... (${retries}/${MAX_RETRIES})`));
                 setTimeout(connectWithRetry, delay);
             } else {
-                console.error('Max retries reached. Exiting.');
+                console.error(chalk.bgRed('✖ Max retries reached. Exiting.'));
                 process.exit(1);
             }
         });
@@ -67,7 +69,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     res.status(err.status ?? 500).send(`<h1>${err.message ?? 'มีข้อผิดพลาดเกิดขึ้น'}</h1>`)
 })
 app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`)
+    console.log(chalk.greenBright.bold(`✔ Server started at ${chalk.underline.white(`http://localhost:${PORT}`)}`))
+
 }
 )
 // mongoose.connection.on('disconnected', () => {
