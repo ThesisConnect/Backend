@@ -2,9 +2,8 @@ import express, { NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import ms from 'ms';
-import test from './routers/test';
 import chalk from 'chalk';
-
+import router from './routers/routers';
 // import cors from 'cors';
 
 interface Error {
@@ -57,10 +56,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json());
-app.use("/test", test)
 app.get('/', (req:Request, res:Response) => {
     res.send('<h1>Hello World</h1>')
 })
+app.use('/', router)
 //next()
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (res.headersSent) {
