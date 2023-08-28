@@ -4,8 +4,10 @@ import mongoose from 'mongoose';
 import ms from 'ms';
 import chalk from 'chalk';
 import router from './routers/routers';
-// import cors from 'cors';
-
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import authRoute from './Authentication/authRoute';
+import jwtMiddleware from './middleware/jwtMiddleware';
 interface Error {
     status?: number
     message?: string
@@ -47,19 +49,24 @@ connectWithRetry();
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000)
-// app.use(cors());
+app.use(cors());
+app.use(cookieParser());
 app.use((req: Request, res: Response, next: NextFunction) => {
     if (mongoose.connection.readyState !== 1) { // 1 means connected
         return res.status(503).send('Database not connected');
     }
     next();
 });
-app.use(express.urlencoded({ extended: false }))
+// app.use(express.urlencoded({ extended: false }))
+
 app.use(express.json());
 app.get('/', (req:Request, res:Response) => {
     res.send('<h1>Hello World</h1>')
 })
-app.use('/', router)
+app.use('/auth',authRoute)
+app.use('/',jwtMiddleware, router)
+
+
 //next()
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (res.headersSent) {
