@@ -1,20 +1,22 @@
 import express, { NextFunction, Request, Response } from 'express';
 import admin from '../Authentication/FirebaseAdmin/admin';
+
 const jwtMiddleware = async(req:Request, res:Response, next:NextFunction) => {
     const token = req.cookies.session || '';
+    // console.log(token)
     try {
-        const decoded = admin.auth().verifySessionCookie(token, true);
+        // console.log("decode")
+        const decoded = await admin.auth().verifySessionCookie(token, true);
+        // console.log(decoded)
         if (!decoded) throw new Error('Validation failed!');
-        const user =await admin.auth().verifyIdToken(token);
         req.user = {
-            uid:user.uid,
-            email:user.email!
+            uid:decoded.uid,
+            email:decoded.email!
         }
-        console.log(user.uid);
         next();
     }
     catch (error) {
-        res.redirect('http://localhost:3000/login');
+      res.status(200).send({ isAuthenticated: false });
     }
   };
 
