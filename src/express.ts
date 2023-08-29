@@ -45,11 +45,17 @@ const connectWithRetry = () => {
 };
 
 connectWithRetry();
-
+const corsOptions = {
+  origin: function (origin:any, callback:any) {
+    callback(null, true); // Allow all origins
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // The HTTP methods you want to allow
+  credentials: true // This allows session cookies to be sent and received
+};
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000)
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use((req: Request, res: Response, next: NextFunction) => {
     if (mongoose.connection.readyState !== 1) { // 1 means connected

@@ -6,7 +6,8 @@ export interface IUser  {
     name: string;
     surname: string;
     username: string;
-    avatar: string;
+    avatar?: string;
+    role: "advisor" | "advisee"
 }
 interface IUserDocument extends IUser, Document {
     _id: string;
@@ -31,6 +32,10 @@ const userSchema = new Schema<IUserDocument,IUserDocument>(
             required: true,
         },
         avatar: {
+            type: String,
+            
+        },
+        role: {
             type: String,
             required: true,
         },

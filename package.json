@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev src/express.ts",
+    "dev": "ts-node-dev --files src/express.ts",
     "build": "tsc",
     "start": "node dist/express.js"
   },
@@ -27,6 +27,7 @@
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
+    "firebase": "^10.3.0",
     "firebase-admin": "^11.10.1",
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.4.4",
