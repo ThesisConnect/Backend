@@ -4,5 +4,6 @@ declare namespace NodeJS {
         PORT?: string
         DATABASE_URL?: string
         JWT_SECRET?: string
+        Mail_From?: string
     }
 }
