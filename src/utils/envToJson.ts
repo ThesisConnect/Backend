@@ -12,3 +12,4 @@ fs.writeFileSync(
   path.join(__dirname, '../Authentication/FirebaseAdmin/serviceAccountKey.ts'),
   `export const firebaseConfig = ${JSON.stringify(credentials)};`
 );  
+
