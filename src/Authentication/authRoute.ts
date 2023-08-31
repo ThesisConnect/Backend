@@ -205,7 +205,7 @@ router.get("/logout", (req: Request, res: Response) => {
     };
   }
   // console.log("logout  route")
-  res.clearCookie("session");
+  res.clearCookie("session", options);
   res.status(200).send({ message: "Logout successful" });
 });
 
