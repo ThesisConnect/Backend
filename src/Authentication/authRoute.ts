@@ -95,7 +95,7 @@ router.post("/register", async (req: Request, res: Response) => {
       role: req.body.role,
     });
     await newUser.save();
-    const sentData = { ...newUser.toObject(), email, isAuthenticated: true };
+    const sentData = { ...newUser.toObject(), email, isAuthenticated: false };
     return res.status(200).send(_.omit(sentData, ["_id", "__v"]));
   } catch (error) {
     let message = {
