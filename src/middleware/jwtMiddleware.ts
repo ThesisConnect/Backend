@@ -9,6 +9,7 @@ const jwtMiddleware = async(req:Request, res:Response, next:NextFunction) => {
     try {
         // console.log("decode")
         const decoded = await admin.auth().verifySessionCookie(token, true);
+        if(decoded.email_verified === false) throw new Error('Email not verified!');
         // console.log(decoded)
         if (!decoded) throw new Error('Validation failed!');
         req.user = {
@@ -19,7 +20,7 @@ const jwtMiddleware = async(req:Request, res:Response, next:NextFunction) => {
     }
     catch (error) {
       console.log(error)
-      res.status(200).send({ isAuthenticated: false });
+      res.status(200).send({ codeError:error ,isAuthenticated: false });
     }
   };
 
