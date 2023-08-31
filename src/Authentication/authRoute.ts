@@ -35,8 +35,13 @@ router.post('/login',async (req:Request, res:Response) => {
 
     try {
         const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn })
-        const options = { maxAge: expiresIn, httpOnly: true, secure: isDev?false:true };
-        res.cookie('session', sessionCookie, options);
+        let options:object = { maxAge: expiresIn, httpOnly: true, secure: false };
+        if(!isDev) {
+            options = {
+                ...options,secure: true,sameSite: 'none'
+            }
+        }
+        res.cookie('session', sessionCookie,options );
         const decodedIdToken = await admin.auth().verifyIdToken(idToken);
         const {uid ,email} = decodedIdToken;
         const user = await User.findById(uid);
@@ -61,8 +66,13 @@ router.post('/register',async (req:Request, res:Response) => {
     const expiresIn = ms('5d');
     try {
         const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn })
-        const options = { maxAge: expiresIn, httpOnly: true, secure: isDev?false:true };
-        res.cookie('session', sessionCookie, options);
+        let options:object = { maxAge: expiresIn, httpOnly: true, secure: false };
+        if(!isDev) {
+            options = {
+                ...options,secure: true,sameSite: 'none'
+            }
+        }
+        res.cookie('session', sessionCookie, {});
         const decodedIdToken = await admin.auth().verifyIdToken(idToken);
         const {uid ,email} = decodedIdToken;
         const user = await User.findById(uid);
