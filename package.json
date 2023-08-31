@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --files src/express.ts",
-    "build": "tsc",
+    "convertJson": "ts-node-dev src/utils/jsonToEnv.ts >> .env",
+    "convertEnvtoJson": "ts-node-dev src/utils/envToJson.ts ",
+    "build": "npm run convertEnvtoJson && tsc",
     "start": "node dist/express.js"
   },
   "author": "",
