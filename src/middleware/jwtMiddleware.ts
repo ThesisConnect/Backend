@@ -18,7 +18,7 @@ const jwtMiddleware = async(req:Request, res:Response, next:NextFunction) => {
         next();
     }
     catch (error) {
-        console.log(error)
+      console.log(error)
       res.status(200).send({ isAuthenticated: false });
     }
   };
