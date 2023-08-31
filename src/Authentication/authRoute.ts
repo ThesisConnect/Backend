@@ -3,15 +3,12 @@ import admin from './FirebaseAdmin/admin';
 import User from '../models/user';
 import jwtMiddleware from '../middleware/jwtMiddleware';
 import ms from 'ms';
-import { log } from 'console';
 import * as _ from 'lodash';
 const router = express.Router();
-import nodemailer from 'nodemailer';
-import { send } from 'process';
-import { sendEmail } from '../utils/sendmail';
-import generateEmailContent from '../utils/emailTemplate/passwordReset';
+import isDev from '../utils/isDev';
 
 router.get('/checkAuth', jwtMiddleware, async (req:Request, res:Response) => {
+    
     if (req.user) {
       const { uid ,email} = req.user;
       const user = await User.findById(uid);
@@ -38,7 +35,7 @@ router.post('/login',async (req:Request, res:Response) => {
 
     try {
         const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn })
-        const options = { maxAge: expiresIn, httpOnly: true, secure: false };
+        const options = { maxAge: expiresIn, httpOnly: true, secure: isDev?false:true };
         res.cookie('session', sessionCookie, options);
         const decodedIdToken = await admin.auth().verifyIdToken(idToken);
         const {uid ,email} = decodedIdToken;
@@ -64,7 +61,7 @@ router.post('/register',async (req:Request, res:Response) => {
     const expiresIn = ms('5d');
     try {
         const sessionCookie = await admin.auth().createSessionCookie(idToken, { expiresIn })
-        const options = { maxAge: expiresIn, httpOnly: true, secure: false };
+        const options = { maxAge: expiresIn, httpOnly: true, secure: isDev?false:true };
         res.cookie('session', sessionCookie, options);
         const decodedIdToken = await admin.auth().verifyIdToken(idToken);
         const {uid ,email} = decodedIdToken;
@@ -145,29 +142,27 @@ router.post('/update/password',jwtMiddleware,async (req:Request, res:Response) =
     }
   }
 )
-router.post("/forgot/password", async (req:Request, res:Response) => {
-    const email = req.body.email;
-    try {
-        const link = await admin.auth().generatePasswordResetLink(email);
+// router.post("/forgot/password", async (req:Request, res:Response) => {
+//     const email = req.body.email;
+//     try {
+//         const link = await admin.auth().generatePasswordResetLink(email);
        
-        const uid = (await admin.auth().getUserByEmail(email)).uid;
-        const user = await User.findById(uid);
+//         const uid = (await admin.auth().getUserByEmail(email)).uid;
+//         const user = await User.findById(uid);
        
-        const html = generateEmailContent(user?.username||"cat",link)
-        sendEmail("Reset password",html,email)
-        return res.status(200).send({message:"Send email successfully"});
-    } catch (error: any) {
-        console.log(error?.errorInfo)
-        const message ={
-            codeError: <string>error?.errorInfo.code.split("/")[1],
-            message: 'UNAUTHORIZED REQUEST!'
-        }
-        res.status(401).send(message);
-    }
-  }
-)
-
-
+//         const html = generateEmailContent(user?.username||"cat",link)
+//         sendEmail("Reset password",html,email)
+//         return res.status(200).send({message:"Send email successfully"});
+//     } catch (error: any) {
+//         console.log(error?.errorInfo)
+//         const message ={
+//             codeError: <string>error?.errorInfo.code.split("/")[1],
+//             message: 'UNAUTHORIZED REQUEST!'
+//         }
+//         res.status(401).send(message);
+//     }
+//   }
+// )
 router.get('/logout', (req:Request, res:Response) => {
     // console.log("logout  route")
     res.clearCookie('session');

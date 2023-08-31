@@ -3,11 +3,12 @@ import admin from '../Authentication/FirebaseAdmin/admin';
 
 const jwtMiddleware = async(req:Request, res:Response, next:NextFunction) => {
     const token = req.cookies.session || '';
-    // console.log(token)
+    console.log("token",token)
+
     try {
         // console.log("decode")
         const decoded = await admin.auth().verifySessionCookie(token, true);
-        // console.log(decoded)
+        console.log(decoded)
         if (!decoded) throw new Error('Validation failed!');
         req.user = {
             uid:decoded.uid,

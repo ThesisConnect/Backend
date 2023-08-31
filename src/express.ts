@@ -51,6 +51,7 @@ const corsOptions = {
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // The HTTP methods you want to allow
   credentials: true // This allows session cookies to be sent and received
+  
 };
 
 const app = express();
