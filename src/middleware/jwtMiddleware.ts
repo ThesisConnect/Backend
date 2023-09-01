@@ -8,6 +8,7 @@ const jwtMiddleware = async(req:Request, res:Response, next:NextFunction) => {
     // console.log("isdev",isDev)
     try {
         // console.log("decode")
+        if(!token) throw new Error('No token found! || token expired! || Email not verified!');
         const decoded = await admin.auth().verifySessionCookie(token, true);
         if(decoded.email_verified === false) throw new Error('Email not verified!');
         // console.log(decoded)
