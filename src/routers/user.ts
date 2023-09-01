@@ -1,29 +1,34 @@
-import express from 'express';
-import User from "../models/user";
-import * as _ from "lodash";
-import Project from "../models/project";
+import express from 'express'
+import User from '../models/user'
+import * as _ from 'lodash'
+import Project from '../models/project'
 
-const router = express.Router();
+const router = express.Router()
 router.get('/data/:uid', async (req, res) => {
   if (req.params.uid) {
-    const user = await User.findById(req.params.uid);
+    const user = await User.findById(req.params.uid)
     if (!user) {
-      res.status(200).send({found: false});
-      return;
+      res.status(200).send({ found: false })
+      return
     }
-    const sentData = {...user.toObject(), found: true};
-    return res.status(200).send(_.omit(sentData, ["_id", "__v"]));
+    const sentData = { ...user.toObject(), found: true }
+    return res.status(200).send(_.omit(sentData, ['_id', '__v']))
   }
 })
 
 router.get('/project/:uid', async (req, res) => {
   if (req.params.uid) {
-    const projects = await Project.find({$or: [{advisors: {"$in": req.params.uid}}, {advisee: {"$in": req.params.uid}}]},);
+    const projects = await Project.find({
+      $or: [
+        { advisors: { $in: req.params.uid } },
+        { advisee: { $in: req.params.uid } },
+      ],
+    })
     const sentData = projects.map((item) => {
       return item?._id
     })
-    return res.status(200).send(sentData);
+    return res.status(200).send(sentData)
   }
 })
 
-export default router;
+export default router

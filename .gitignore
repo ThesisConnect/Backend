@@ -130,3 +130,5 @@ dist
 .pnp.*
 .DS_Store
 src/Authentication/FirebaseAdmin/serviceAccountKey.ts
+
+.idea

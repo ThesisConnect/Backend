@@ -1,91 +1,91 @@
-import express, {Request, Response} from "express";
-import admin from "./FirebaseAdmin/admin";
-import User from "../models/user";
-import jwtMiddleware from "../middleware/jwtMiddleware";
-import ms from "ms";
-import * as _ from "lodash";
-import isDev from "../utils/isDev";
+import express, { Request, Response } from 'express'
+import admin from './FirebaseAdmin/admin'
+import User from '../models/user'
+import jwtMiddleware from '../middleware/jwtMiddleware'
+import ms from 'ms'
+import * as _ from 'lodash'
+import isDev from '../utils/isDev'
 
-const router = express.Router();
+const router = express.Router()
 
-router.get("/checkAuth", jwtMiddleware, async (req: Request, res: Response) => {
+router.get('/checkAuth', jwtMiddleware, async (req: Request, res: Response) => {
   if (req.user) {
-    const {uid, email} = req.user;
-    const user = await User.findById(uid);
+    const { uid, email } = req.user
+    const user = await User.findById(uid)
     if (!user) {
-      res.status(200).send({isAuthenticated: false});
-      return;
+      res.status(200).send({ isAuthenticated: false })
+      return
     }
-    const sentData = {...user.toObject(), email, isAuthenticated: true};
-    return res.status(200).send(_.omit(sentData, ["_id", "__v"]));
+    const sentData = { ...user.toObject(), email, isAuthenticated: true }
+    return res.status(200).send(_.omit(sentData, ['_id', '__v']))
   } else {
-    res.status(200).send({isAuthenticated: false});
+    res.status(200).send({ isAuthenticated: false })
   }
-});
+})
 
-router.post("/login", async (req: Request, res: Response) => {
+router.post('/login', async (req: Request, res: Response) => {
   // console.log(req.body)
-  const idToken = req.body.idToken;
+  const idToken = req.body.idToken
   // const csrfToken = req.body.csrfToken.toString();
   // if (csrfToken !== req.cookies.csrfToken) {
   //     res.status(401).send('UNAUTHORIZED REQUEST!');
   //     return;
   //   }
-  const expiresIn = ms("5d");
+  const expiresIn = ms('5d')
 
   try {
     const sessionCookie = await admin
       .auth()
-      .createSessionCookie(idToken, {expiresIn});
-    let options: object = {maxAge: expiresIn, httpOnly: true, secure: false};
+      .createSessionCookie(idToken, { expiresIn })
+    let options: object = { maxAge: expiresIn, httpOnly: true, secure: false }
     if (!isDev) {
       options = {
         ...options,
         secure: true,
-        sameSite: "none",
-      };
+        sameSite: 'none',
+      }
     }
-    res.cookie("session", sessionCookie, options);
-    const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-    const {uid, email} = decodedIdToken;
-    const user = await User.findById(uid);
+    res.cookie('session', sessionCookie, options)
+    const decodedIdToken = await admin.auth().verifyIdToken(idToken)
+    const { uid, email } = decodedIdToken
+    const user = await User.findById(uid)
     if (!user) {
-      throw new Error("User not found!");
+      throw new Error('User not found!')
     }
-    const sentData = {...user.toObject(), email, isAuthenticated: true};
-    return res.status(200).send(_.omit(sentData, ["_id", "__v"]));
+    const sentData = { ...user.toObject(), email, isAuthenticated: true }
+    return res.status(200).send(_.omit(sentData, ['_id', '__v']))
   } catch (error) {
-    res.status(401).send(error || "UNAUTHORIZED REQUEST!");
+    res.status(401).send(error || 'UNAUTHORIZED REQUEST!')
   }
-});
+})
 
-router.post("/register", async (req: Request, res: Response) => {
+router.post('/register', async (req: Request, res: Response) => {
   // console.log(req.body);
-  const idToken = req.body.idToken;
+  const idToken = req.body.idToken
   // const csrfToken = req.body.csrfToken.toString();
   // if (csrfToken !== req.cookies.csrfToken) {
   //     res.status(401).send('UNAUTHORIZED REQUEST!');
   //     return;
   //   }
-  const expiresIn = ms("5d");
+  const expiresIn = ms('5d')
   try {
     const sessionCookie = await admin
       .auth()
-      .createSessionCookie(idToken, {expiresIn});
-    let options: object = {maxAge: expiresIn, httpOnly: true, secure: false};
+      .createSessionCookie(idToken, { expiresIn })
+    let options: object = { maxAge: expiresIn, httpOnly: true, secure: false }
     if (!isDev) {
       options = {
         ...options,
         secure: true,
-        sameSite: "none",
-      };
+        sameSite: 'none',
+      }
     }
-    res.cookie("session", sessionCookie, {});
-    const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-    const {uid, email} = decodedIdToken;
-    const user = await User.findById(uid);
+    res.cookie('session', sessionCookie, {})
+    const decodedIdToken = await admin.auth().verifyIdToken(idToken)
+    const { uid, email } = decodedIdToken
+    const user = await User.findById(uid)
     if (user) {
-      throw new Error("User already exists!");
+      throw new Error('User already exists!')
     }
     const newUser = new User({
       _id: uid,
@@ -94,83 +94,83 @@ router.post("/register", async (req: Request, res: Response) => {
       username: req.body.username,
       avatar: req.body.avatar,
       role: req.body.role,
-    });
-    await newUser.save();
-    const sentData = {...newUser.toObject(), email, isAuthenticated: false};
-    return res.status(200).send(_.omit(sentData, ["_id", "__v"]));
+    })
+    await newUser.save()
+    const sentData = { ...newUser.toObject(), email, isAuthenticated: false }
+    return res.status(200).send(_.omit(sentData, ['_id', '__v']))
   } catch (error) {
     let message = {
       codeError: error,
-      message: "UNAUTHORIZED REQUEST!",
-    };
-    res.status(401).send(message);
+      message: 'UNAUTHORIZED REQUEST!',
+    }
+    res.status(401).send(message)
   }
-});
+})
 
 router.post(
-  "/update/profile",
+  '/update/profile',
   jwtMiddleware,
   async (req: Request, res: Response) => {
     // console.log(req.body);
-    const idToken = req.body.idToken;
+    const idToken = req.body.idToken
     // const csrfToken = req.body.csrfToken.toString();
     // if (csrfToken !== req.cookies.csrfToken) {
     //     res.status(401).send('UNAUTHORIZED REQUEST!');
     //     return;
     //   }
     try {
-      const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-      const {uid, email} = decodedIdToken;
-      const user = await User.findById(uid);
+      const decodedIdToken = await admin.auth().verifyIdToken(idToken)
+      const { uid, email } = decodedIdToken
+      const user = await User.findById(uid)
       if (!user) {
-        throw new Error("User not found!");
+        throw new Error('User not found!')
       }
-      user.name = req.body.name;
-      user.surname = req.body.surname;
-      user.username = req.body.username;
-      user.avatar = req.body.avatar;
-      await user.save();
+      user.name = req.body.name
+      user.surname = req.body.surname
+      user.username = req.body.username
+      user.avatar = req.body.avatar
+      await user.save()
       const sentData = {
         ...user.toObject(),
         email,
-        message: "Update profile successfully",
+        message: 'Update profile successfully',
         isAuthenticated: true,
-      };
-      return res.status(200).send(_.omit(sentData, ["_id", "__v"]));
+      }
+      return res.status(200).send(_.omit(sentData, ['_id', '__v']))
     } catch (error) {
-      console.log(error);
-      res.status(401).send(error || "UNAUTHORIZED REQUEST!");
+      console.log(error)
+      res.status(401).send(error || 'UNAUTHORIZED REQUEST!')
     }
-  }
-);
+  },
+)
 router.post(
-  "/update/password",
+  '/update/password',
   jwtMiddleware,
   async (req: Request, res: Response) => {
     // console.log(req.body);
-    const idToken = req.body.idToken;
+    const idToken = req.body.idToken
     // const csrfToken = req.body.csrfToken.toString();
     // if (csrfToken !== req.cookies.csrfToken) {
     //     res.status(401).send('UNAUTHORIZED REQUEST!');
     //     return;
     //   }
     try {
-      const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-      const {uid, email} = decodedIdToken;
+      const decodedIdToken = await admin.auth().verifyIdToken(idToken)
+      const { uid, email } = decodedIdToken
       await admin.auth().updateUser(uid, {
         password: req.body.password,
-      });
-      return res.status(200).send({message: "Update password successfully"});
+      })
+      return res.status(200).send({ message: 'Update password successfully' })
     } catch (error) {
-      console.log(error);
+      console.log(error)
       const message = {
         codeError: error,
-        message: "UNAUTHORIZED REQUEST!",
-      };
-      res.status(401).send(message);
+        message: 'UNAUTHORIZED REQUEST!',
+      }
+      res.status(401).send(message)
     }
-  }
-);
+  },
+)
 // router.post("/forgot/password", async (req:Request, res:Response) => {
 //     const email = req.body.email;
 //     try {
@@ -192,22 +192,22 @@ router.post(
 //     }
 //   }
 // )
-router.get("/logout", (req: Request, res: Response) => {
+router.get('/logout', (req: Request, res: Response) => {
   let options: object = {
     httpOnly: true,
     secure: false,
-  };
+  }
 
   if (!isDev) {
     options = {
       ...options,
       secure: true,
-      sameSite: "none",
-    };
+      sameSite: 'none',
+    }
   }
   // console.log("logout  route")
-  res.clearCookie("session", options);
-  res.status(200).send({message: "Logout successful"});
-});
+  res.clearCookie('session', options)
+  res.status(200).send({ message: 'Logout successful' })
+})
 
-export default router;
+export default router

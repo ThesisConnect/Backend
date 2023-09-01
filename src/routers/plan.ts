@@ -1,22 +1,22 @@
-import express from 'express';
-import * as _ from "lodash";
-import Plan from "../models/plan";
-import {uuidv4} from "@firebase/util";
+import express from 'express'
+import * as _ from 'lodash'
+import Plan from '../models/plan'
+import { uuidv4 } from '@firebase/util'
 
-const router = express.Router();
+const router = express.Router()
 router.get('/data/:id', async (req, res) => {
   if (req.params.id) {
-    const plan = await Plan.findById(req.params.id);
+    const plan = await Plan.findById(req.params.id)
     if (!plan) {
-      res.status(400).send({found: false});
-      return;
+      res.status(400).send({ found: false })
+      return
     }
-    const sentData = {...plan.toObject(), found: true};
-    return res.status(200).send(sentData);
+    const sentData = { ...plan.toObject(), found: true }
+    return res.status(200).send(sentData)
   }
 })
 
-router.post("/create", async (req, res) => {
+router.post('/create', async (req, res) => {
   const result = await Plan.create({
     project_id: req.body.project_id,
     name: req.body.name,
@@ -27,12 +27,12 @@ router.post("/create", async (req, res) => {
     task: req.body.task,
     chat_id: req.body.task ? uuidv4() : null,
     folder_id: req.body.task ? uuidv4() : null,
-  });
+  })
   if (result) {
-    return res.status(200).send(result);
+    return res.status(200).send(result)
   } else {
-    return res.status(400).send("Bad request");
+    return res.status(400).send('Bad request')
   }
-});
+})
 
-export default router;
+export default router
