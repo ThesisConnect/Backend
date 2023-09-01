@@ -54,11 +54,9 @@ const planSchema = new Schema<IPlanDocument, IPlanDocument>({
     },
     chat_id: {
         type: String,
-        required: true,
     },
     folder_id: {
         type: String,
-        required: true,
     },
 });
 
