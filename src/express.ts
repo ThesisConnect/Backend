@@ -71,7 +71,7 @@ app.get('/', (req:Request, res:Response) => {
     res.send('<h1>Hello World</h1>')
 })
 app.use('/auth',authRoute)
-app.use('/',jwtMiddleware, router)
+app.use('/', router)
 
 
 //next()

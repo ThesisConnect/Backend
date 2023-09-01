@@ -1,24 +1,25 @@
-import express, { NextFunction, Request, Response } from "express";
+import express, {Request, Response} from "express";
 import admin from "./FirebaseAdmin/admin";
 import User from "../models/user";
 import jwtMiddleware from "../middleware/jwtMiddleware";
 import ms from "ms";
 import * as _ from "lodash";
-const router = express.Router();
 import isDev from "../utils/isDev";
+
+const router = express.Router();
 
 router.get("/checkAuth", jwtMiddleware, async (req: Request, res: Response) => {
   if (req.user) {
-    const { uid, email } = req.user;
+    const {uid, email} = req.user;
     const user = await User.findById(uid);
     if (!user) {
-      res.status(200).send({ isAuthenticated: false });
+      res.status(200).send({isAuthenticated: false});
       return;
     }
-    const sentData = { ...user.toObject(), email, isAuthenticated: true };
+    const sentData = {...user.toObject(), email, isAuthenticated: true};
     return res.status(200).send(_.omit(sentData, ["_id", "__v"]));
   } else {
-    res.status(200).send({ isAuthenticated: false });
+    res.status(200).send({isAuthenticated: false});
   }
 });
 
@@ -35,8 +36,8 @@ router.post("/login", async (req: Request, res: Response) => {
   try {
     const sessionCookie = await admin
       .auth()
-      .createSessionCookie(idToken, { expiresIn });
-    let options: object = { maxAge: expiresIn, httpOnly: true, secure: false };
+      .createSessionCookie(idToken, {expiresIn});
+    let options: object = {maxAge: expiresIn, httpOnly: true, secure: false};
     if (!isDev) {
       options = {
         ...options,
@@ -46,12 +47,12 @@ router.post("/login", async (req: Request, res: Response) => {
     }
     res.cookie("session", sessionCookie, options);
     const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-    const { uid, email } = decodedIdToken;
+    const {uid, email} = decodedIdToken;
     const user = await User.findById(uid);
     if (!user) {
       throw new Error("User not found!");
     }
-    const sentData = { ...user.toObject(), email, isAuthenticated: true };
+    const sentData = {...user.toObject(), email, isAuthenticated: true};
     return res.status(200).send(_.omit(sentData, ["_id", "__v"]));
   } catch (error) {
     res.status(401).send(error || "UNAUTHORIZED REQUEST!");
@@ -70,8 +71,8 @@ router.post("/register", async (req: Request, res: Response) => {
   try {
     const sessionCookie = await admin
       .auth()
-      .createSessionCookie(idToken, { expiresIn });
-    let options: object = { maxAge: expiresIn, httpOnly: true, secure: false };
+      .createSessionCookie(idToken, {expiresIn});
+    let options: object = {maxAge: expiresIn, httpOnly: true, secure: false};
     if (!isDev) {
       options = {
         ...options,
@@ -81,7 +82,7 @@ router.post("/register", async (req: Request, res: Response) => {
     }
     res.cookie("session", sessionCookie, {});
     const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-    const { uid, email } = decodedIdToken;
+    const {uid, email} = decodedIdToken;
     const user = await User.findById(uid);
     if (user) {
       throw new Error("User already exists!");
@@ -95,7 +96,7 @@ router.post("/register", async (req: Request, res: Response) => {
       role: req.body.role,
     });
     await newUser.save();
-    const sentData = { ...newUser.toObject(), email, isAuthenticated: false };
+    const sentData = {...newUser.toObject(), email, isAuthenticated: false};
     return res.status(200).send(_.omit(sentData, ["_id", "__v"]));
   } catch (error) {
     let message = {
@@ -119,7 +120,7 @@ router.post(
     //   }
     try {
       const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-      const { uid, email } = decodedIdToken;
+      const {uid, email} = decodedIdToken;
       const user = await User.findById(uid);
       if (!user) {
         throw new Error("User not found!");
@@ -155,11 +156,11 @@ router.post(
     //   }
     try {
       const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-      const { uid, email } = decodedIdToken;
+      const {uid, email} = decodedIdToken;
       await admin.auth().updateUser(uid, {
         password: req.body.password,
       });
-      return res.status(200).send({ message: "Update password successfully" });
+      return res.status(200).send({message: "Update password successfully"});
     } catch (error) {
       console.log(error);
       const message = {
@@ -192,7 +193,7 @@ router.post(
 //   }
 // )
 router.get("/logout", (req: Request, res: Response) => {
-  let options:object = {
+  let options: object = {
     httpOnly: true,
     secure: false,
   };
@@ -206,7 +207,7 @@ router.get("/logout", (req: Request, res: Response) => {
   }
   // console.log("logout  route")
   res.clearCookie("session", options);
-  res.status(200).send({ message: "Logout successful" });
+  res.status(200).send({message: "Logout successful"});
 });
 
 export default router;
