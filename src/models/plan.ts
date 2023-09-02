@@ -12,6 +12,7 @@ export interface IPlan {
   task: boolean
   chat_id?: string
   folder_id?: string
+  archived: boolean
 }
 
 interface IPlanDocument extends IPlan, Document {
@@ -38,6 +39,7 @@ const planSchema = new Schema<IPlanDocument, IPlanDocument>({
   },
   progress: {
     type: Number,
+    default: 0,
     required: true,
   },
   start_date: {
@@ -57,6 +59,11 @@ const planSchema = new Schema<IPlanDocument, IPlanDocument>({
   },
   folder_id: {
     type: String,
+  },
+  archived: {
+    type: Boolean,
+    default: false,
+    required: true,
   },
 })
 

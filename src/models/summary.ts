@@ -10,6 +10,7 @@ export interface ISummary {
   comment: string
   progress: number
   file_id: string[]
+  chat_id: string
 }
 
 interface ISummaryDocument extends ISummary, Document {
@@ -48,6 +49,10 @@ const summarySchema = new Schema<ISummaryDocument, ISummaryDocument>({
   },
   file_id: {
     type: [String],
+    required: true,
+  },
+  chat_id: {
+    type: String,
     required: true,
   },
 })

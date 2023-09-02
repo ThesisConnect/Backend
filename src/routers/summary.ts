@@ -1,7 +1,7 @@
 import express from 'express'
 import * as _ from 'lodash'
 import Summary from '../models/summary'
-import { uuidv4 } from '@firebase/util'
+import { createSchema } from '../schema/summary'
 
 const router = express.Router()
 
@@ -18,14 +18,19 @@ router.get('/data/:id', async (req, res) => {
 })
 
 router.post('/create', async (req, res) => {
+  const createData = createSchema.safeParse(req.body)
+  if (!createData.success) {
+    return res.status(400).send('Bad request')
+  }
   const result = await Summary.create({
-    project_id: req.body.project_id,
-    plan_id: req.body.plan_id,
-    reciever_id: req.body.reciever_id,
-    sender_id: req.body.sender_id,
-    comment: req.body.comment,
-    progress: 0,
-    file_id: req.body.file_id,
+    project_id: createData.data.project_id,
+    plan_id: createData.data.plan_id,
+    reciever_id: createData.data.reciever_id,
+    sender_id: createData.data.sender_id,
+    comment: createData.data.comment,
+    file_id: createData.data.file_id,
+    chat_id: createData.data.chat_id,
+    progress: createData.data.progress,
   })
   if (result) {
     return res.status(200).send(result)

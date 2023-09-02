@@ -1,6 +1,7 @@
 import express from 'express'
 import * as _ from 'lodash'
 import Project from '../models/project'
+import { createSchema, editSchema } from '../schema/project'
 import { uuidv4 } from '@firebase/util'
 
 const router = express.Router()
@@ -23,23 +24,21 @@ router.get('/users/:id', async (req, res) => {
       res.status(200).send({ users: [] })
       return
     }
-    const sentData = { users: [...project.advisors, ...project.advisee] }
+    const sentData = { advisors: project.advisors, co_advisors: project.co_advisors, advisee: project.advisee }
     return res.status(200).send(sentData)
   }
 })
 
 router.post('/create', async (req, res) => {
+  const createData = createSchema.safeParse(req.body)
+  if (!createData.success) {
+    return res.status(400).send('Bad request')
+  }
   const result = await Project.create({
-    name: req.body.name,
-    progress: 0,
-    status: {
-      id: 1,
-      name: 'Proposal',
-      order: 1,
-    },
-    advisors: req.body.advisors,
-    co_advisors: req.body.co_advisors,
-    advisee: req.body.advisee,
+    name: createData.data.name,
+    advisors: createData.data.advisors,
+    co_advisors: createData.data.co_advisors,
+    advisee: createData.data.advisee,
     chat_id: uuidv4(),
   })
   if (result) {
@@ -49,12 +48,16 @@ router.post('/create', async (req, res) => {
   }
 })
 
-router.put('/edit/:id', async (req, res) => {
-  const result = await Project.findByIdAndUpdate(req.params.id, {
-    name: req.body.name,
-    advisors: req.body.advisors,
-    co_advisors: req.body.co_advisors,
-    advisee: req.body.advisee,
+router.put('/edit', async (req, res) => {
+  const editData = editSchema.safeParse(req.body)
+  if (!editData.success) {
+    return res.status(400).send('Bad request')
+  }
+  const result = await Project.findByIdAndUpdate(editData.data._id, {
+    name: editData.data.name,
+    advisors: editData.data.advisors,
+    co_advisors: editData.data.co_advisors,
+    advisee: editData.data.advisee,
   })
   if (result) {
     return res.status(200).send(result)

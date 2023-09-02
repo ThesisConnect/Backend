@@ -1,7 +1,7 @@
 import express from 'express'
 import * as _ from 'lodash'
 import Plan from '../models/plan'
-import { createSchema,  updateSchema } from '../schema/plan'
+import { createSchema,  editSchema } from '../schema/plan'
 import { uuidv4 } from '@firebase/util'
 
 const router = express.Router()
@@ -26,7 +26,6 @@ router.post('/create', async (req, res) => {
     project_id: createData.data.project_id,
     name: createData.data.name,
     description: createData.data.description,
-    progress: 0,
     start_date: createData.data.start_date,
     end_date: createData.data.end_date,
     task: createData.data.task,
@@ -41,16 +40,16 @@ router.post('/create', async (req, res) => {
 })
 
 router.put('/edit', async (req, res) => {
-  const updateData = updateSchema.safeParse(req.body)
-  if (!updateData.success) {
+  const editData = editSchema.safeParse(req.body)
+  if (!editData.success) {
     return res.status(400).send('Bad request')
   }
-  const result = await Plan.findByIdAndUpdate(updateData.data._id, {
-    name: updateData.data.name,
-    description: updateData.data.description,
-    progress: updateData.data.progress,
-    start_date: updateData.data.start_date,
-    end_date: updateData.data.end_date,
+  const result = await Plan.findByIdAndUpdate(editData.data._id, {
+    name: editData.data.name,
+    description: editData.data.description,
+    progress: editData.data.progress,
+    start_date: editData.data.start_date,
+    end_date: editData.data.end_date,
   })
   if (result) {
     return res.status(200).send('OK')
@@ -74,3 +73,17 @@ router.delete('/delete/:id', async (req, res) => {
 })
 
 export default router
+
+
+
+// GET: http://localhost:8080/plan/data/aef27580-b6c8-4697-ba10-995f2e85e7d3
+// CREATE: http://localhost:8080/plan/create
+// {
+//   "project_id": "55e99b38-b79e-4f18-803b-91329049188f",
+//   "name": "Princess Elle",
+//   "description": "Kai maidee AMD",
+//   "start_date": "09/09/2023",
+//   "end_date": "12/09/2023",
+//   "task": false
+// }
+// 

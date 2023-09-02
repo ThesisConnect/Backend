@@ -34,19 +34,23 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>({
   },
   progress: {
     type: Number,
+    default: 0,
     required: true,
   },
   status: {
     id: {
       type: Number,
+      default: 1,
       required: true,
     },
     name: {
       type: String,
+      default: 'Proposal',
       required: true,
     },
     order: {
       type: Number,
+      default: 1,
       required: true,
     },
   },
