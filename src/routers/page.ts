@@ -6,7 +6,10 @@ import Plan from '../models/plan'
 
 const router = express.Router()
 router.get('/main', async (req, res) => {
-  const uid = 'OU3mOuC6dxg1nPtQKq74Ca9H8hx1'
+  const uid = req.user?.uid
+  if (!uid) {
+    return res.status(400).send('Bad request')
+  }
   const getUsers = function (users: string[]) {
     return Promise.all(
       users.map(async (id) => {
@@ -111,7 +114,8 @@ router.get('/plan/:id', async (req, res) => {
 router.get('/gantt/:id', async (req, res) => {
   if (req.params.id) {
     const plans = await Plan.find({
-      project_id: req.params.id,task: true
+      project_id: req.params.id,
+      task: true,
     })
     const data = await Promise.all(
       plans.map(async (plan) => {
