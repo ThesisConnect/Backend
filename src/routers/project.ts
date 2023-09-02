@@ -38,6 +38,7 @@ router.post('/create', async (req, res) => {
       order: 1,
     },
     advisors: req.body.advisors,
+    co_advisors: req.body.co_advisors,
     advisee: req.body.advisee,
     chat_id: uuidv4(),
   })
@@ -52,6 +53,7 @@ router.put('/edit/:id', async (req, res) => {
   const result = await Project.findByIdAndUpdate(req.params.id, {
     name: req.body.name,
     advisors: req.body.advisors,
+    co_advisors: req.body.co_advisors,
     advisee: req.body.advisee,
   })
   if (result) {

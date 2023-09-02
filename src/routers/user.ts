@@ -21,6 +21,7 @@ router.get('/project/:uid', async (req, res) => {
     const projects = await Project.find({
       $or: [
         { advisors: { $in: req.params.uid } },
+        { co_advisors: { $in: req.params.uid } },
         { advisee: { $in: req.params.uid } },
       ],
     })

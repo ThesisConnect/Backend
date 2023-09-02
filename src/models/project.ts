@@ -13,6 +13,7 @@ export interface IProject {
   progress: number
   status: IStatus
   advisors: string[]
+  co_advisors: string[]
   advisee: string[]
   chat_id: string
 }
@@ -50,6 +51,10 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>({
     },
   },
   advisors: {
+    type: [String],
+    required: true,
+  },
+  co_advisors: {
     type: [String],
     required: true,
   },
