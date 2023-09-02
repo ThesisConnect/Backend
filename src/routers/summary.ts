@@ -20,7 +20,7 @@ router.get('/data/:id', async (req, res) => {
 router.post('/create', async (req, res) => {
   const createData = createSchema.safeParse(req.body)
   if (!createData.success) {
-    return res.status(400).send('Bad request')
+    return res.status(400).send('Body not match')
   }
   const result = await Summary.create({
     project_id: createData.data.project_id,
@@ -40,3 +40,18 @@ router.post('/create', async (req, res) => {
 })
 
 export default router
+
+/*
+Test case
+GET: http://localhost:8080/summary/data/55e99b38-b79e-4f18-803b-91329049188f
+CREATE: http://localhost:8080/summary/create
+{
+   "project_id": "1",
+   "plan_id": "2",
+   "reciever_id": "4",
+   "sender_id": "5",
+   "comment": "jj",
+   "file_id": ["a", "q"],
+   "progress": 99
+}
+*/

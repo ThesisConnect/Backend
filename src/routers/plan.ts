@@ -21,7 +21,7 @@ router.get('/data/:id', async (req, res) => {
 router.post('/create', async (req, res) => {
   const createData = createSchema.safeParse(req.body)
   if (!createData.success) {
-    return res.status(400).send('Bad request')
+    return res.status(400).send('Body not match')
   }
   const chat = await Chat.create({})
   if (!chat) {
@@ -40,14 +40,14 @@ router.post('/create', async (req, res) => {
   if (result) {
     return res.status(200).send(result)
   } else {
-    return res.status(400).send('Bad request')
+    return res.status(400).send('Create failed')
   }
 })
 
 router.put('/edit', async (req, res) => {
   const editData = editSchema.safeParse(req.body)
   if (!editData.success) {
-    return res.status(400).send('Bad request')
+    return res.status(400).send('Body not match')
   }
   const result = await Plan.findByIdAndUpdate(editData.data._id, {
     name: editData.data.name,
@@ -78,14 +78,25 @@ router.delete('/delete/:id', async (req, res) => {
 
 export default router
 
-// GET: http://localhost:8080/plan/data/aef27580-b6c8-4697-ba10-995f2e85e7d3
-// CREATE: http://localhost:8080/plan/create
-// {
-//   "project_id": "55e99b38-b79e-4f18-803b-91329049188f",
-//   "name": "Princess Elle",
-//   "description": "Kai maidee AMD",
-//   "start_date": "09/09/2023",
-//   "end_date": "12/09/2023",
-//   "task": false
-// }
-//
+/*
+Test case
+GET: http://localhost:8080/plan/data/aef27580-b6c8-4697-ba10-995f2e85e7d3
+CREATE: http://localhost:8080/plan/create
+{
+  "project_id": "55e99b38-b79e-4f18-803b-91329049188f",
+  "name": "Princess Elle",
+  "description": "Kai maidee AMD",
+  "start_date": "09/09/2023",
+  "end_date": "12/09/2023",
+  "task": false
+}
+EDIT: http://localhost:8080/plan/edit
+{
+  "_id": "53384bb5-ea62-45f5-90c4-a2aa28e5839a",
+  "progress": 99,
+  "start_date": "09/09/2023",
+  "end_date": "12/09/2023",
+  "task": false
+}
+DELETE: http://localhost:8080/plan/delete/
+*/

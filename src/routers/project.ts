@@ -37,7 +37,7 @@ router.get('/users/:id', async (req, res) => {
 router.post('/create', async (req, res) => {
   const createData = createSchema.safeParse(req.body)
   if (!createData.success) {
-    return res.status(400).send('Bad request')
+    return res.status(400).send('Body not match')
   }
   const chat = await Chat.create({})
   if (!chat) {
@@ -69,7 +69,7 @@ router.put('/edit', async (req, res) => {
     advisee: editData.data.advisee,
   })
   if (result) {
-    return res.status(200).send(result)
+    return res.status(200).send('OK')
   } else {
     return res.status(400).send('Bad request')
   }
@@ -78,10 +78,30 @@ router.put('/edit', async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
   const result = await Project.findByIdAndDelete(req.params.id)
   if (result) {
-    return res.status(200).send(result)
+    return res.status(200).send('OK')
   } else {
     return res.status(400).send('Bad request')
   }
 })
 
 export default router
+
+/*
+Test case
+GET: http://localhost:8080/project/data/55e99b38-b79e-4f18-803b-91329049188f
+CREATE: http://localhost:8080/project/create
+{
+  "name": "Princess Elle",
+  "advisors": ["a", "b"],
+  "co_advisors": ["a", "b"],
+  "advisee": ["a", "b"]
+}
+EDIT: http://localhost:8080/project/edit
+{
+  "_id": "80eb258d-2db8-4694-b0b5-08590767727b",
+  "advisors": ["c"],
+  "co_advisors": ["a", "b"],
+  "advisee": ["a", "b"]
+}
+DELETE: http://localhost:8080/project/delete/
+*/
