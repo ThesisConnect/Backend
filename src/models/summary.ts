@@ -1,4 +1,10 @@
-import { Document, Model, model, Schema } from 'mongoose'
+import {
+  Document,
+  Model,
+  model,
+  Schema,
+  SchemaTimestampsConfig,
+} from 'mongoose'
 import { uuidv4 } from '@firebase/util'
 
 export interface ISummary {
@@ -13,48 +19,51 @@ export interface ISummary {
   chat_id: string
 }
 
-interface ISummaryDocument extends ISummary, Document {
+interface ISummaryDocument extends ISummary, Document, SchemaTimestampsConfig {
   _id: string
 }
 
 type ISummaryModel = Model<ISummaryDocument>
-const summarySchema = new Schema<ISummaryDocument, ISummaryDocument>({
-  _id: {
-    type: String,
-    default: uuidv4(),
+const summarySchema = new Schema<ISummaryDocument, ISummaryDocument>(
+  {
+    _id: {
+      type: String,
+      default: uuidv4(),
+    },
+    project_id: {
+      type: String,
+      required: true,
+    },
+    plan_id: {
+      type: String,
+      required: true,
+    },
+    reciever_id: {
+      type: String,
+      required: true,
+    },
+    sender_id: {
+      type: String,
+      required: true,
+    },
+    comment: {
+      type: String,
+      required: true,
+    },
+    progress: {
+      type: Number,
+      required: true,
+    },
+    file_id: {
+      type: [String],
+      required: true,
+    },
+    chat_id: {
+      type: String,
+      required: true,
+    },
   },
-  project_id: {
-    type: String,
-    required: true,
-  },
-  plan_id: {
-    type: String,
-    required: true,
-  },
-  reciever_id: {
-    type: String,
-    required: true,
-  },
-  sender_id: {
-    type: String,
-    required: true,
-  },
-  comment: {
-    type: String,
-    required: true,
-  },
-  progress: {
-    type: Number,
-    required: true,
-  },
-  file_id: {
-    type: [String],
-    required: true,
-  },
-  chat_id: {
-    type: String,
-    required: true,
-  },
-})
+  { timestamps: true },
+)
 
 export default model<ISummaryDocument, ISummaryModel>('Summary', summarySchema)
