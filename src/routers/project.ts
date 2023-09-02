@@ -3,6 +3,7 @@ import * as _ from 'lodash'
 import Project from '../models/project'
 import { createSchema, editSchema } from '../schema/project'
 import { uuidv4 } from '@firebase/util'
+import Chat from '../models/chat'
 
 const router = express.Router()
 router.get('/data/:id', async (req, res) => {
@@ -24,7 +25,11 @@ router.get('/users/:id', async (req, res) => {
       res.status(200).send({ users: [] })
       return
     }
-    const sentData = { advisors: project.advisors, co_advisors: project.co_advisors, advisee: project.advisee }
+    const sentData = {
+      advisors: project.advisors,
+      co_advisors: project.co_advisors,
+      advisee: project.advisee,
+    }
     return res.status(200).send(sentData)
   }
 })
@@ -34,12 +39,16 @@ router.post('/create', async (req, res) => {
   if (!createData.success) {
     return res.status(400).send('Bad request')
   }
+  const chat = await Chat.create({})
+  if (!chat) {
+    return res.status(500).send('Internal server error')
+  }
   const result = await Project.create({
     name: createData.data.name,
     advisors: createData.data.advisors,
     co_advisors: createData.data.co_advisors,
     advisee: createData.data.advisee,
-    chat_id: uuidv4(),
+    chat_id: chat._id,
   })
   if (result) {
     return res.status(200).send(result)
