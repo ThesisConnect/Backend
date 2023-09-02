@@ -3,6 +3,7 @@ import * as _ from 'lodash'
 import Plan from '../models/plan'
 import { createSchema, editSchema } from '../schema/plan'
 import { uuidv4 } from '@firebase/util'
+import Chat from '../models/chat'
 
 const router = express.Router()
 router.get('/data/:id', async (req, res) => {
@@ -22,6 +23,10 @@ router.post('/create', async (req, res) => {
   if (!createData.success) {
     return res.status(400).send('Body not match')
   }
+  const chat = await Chat.create({})
+  if (!chat) {
+    return res.status(500).send('Internal server error')
+  }
   const result = await Plan.create({
     project_id: createData.data.project_id,
     name: createData.data.name,
@@ -29,7 +34,7 @@ router.post('/create', async (req, res) => {
     start_date: createData.data.start_date,
     end_date: createData.data.end_date,
     task: createData.data.task,
-    chat_id: req.body.task ? uuidv4() : null,
+    chat_id: req.body.task ? chat._id : null,
     folder_id: req.body.task ? uuidv4() : null,
   })
   if (result) {

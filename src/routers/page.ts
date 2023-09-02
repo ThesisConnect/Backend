@@ -108,4 +108,27 @@ router.get('/plan/:id', async (req, res) => {
   return res.status(400).send('Bad request')
 })
 
+router.get('/gantt/:id', async (req, res) => {
+  if (req.params.id) {
+    const plans = await Plan.find({
+      project_id: req.params.id,task: true
+    })
+    const data = await Promise.all(
+      plans.map(async (plan) => {
+        return {
+          id: plan._id,
+          chat_id: plan.chat_id,
+          name: plan.name,
+          progress: plan.progress,
+          start_date: plan.start_date,
+          end_date: plan.end_date,
+          description: plan.description,
+        }
+      }),
+    )
+    return res.status(200).send(data)
+  }
+  return res.status(400).send('Bad request')
+})
+
 export default router
