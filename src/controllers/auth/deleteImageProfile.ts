@@ -7,10 +7,17 @@ import deleteFile from '../services/deleteFile';
 
 const deleteImageProfileUrl =async (req: Request, res: Response) => {
     try {
-        const oldpath = req.body.oldpath;
-        const oldDirectory = oldpath.split("/")[3];
-        const oldFileName = oldpath.split("/")[4];
-        await deleteFile(oldDirectory,oldFileName);
+        const user = await User.findById(req.user?.uid);
+        if(user?.avatar){
+            const oldpath = user.avatar;
+            const oldDirectory = oldpath.split("/")[3];
+            const oldFileName = oldpath.split("/")[4];
+            await deleteFile(oldDirectory,oldFileName);
+            user.avatar = undefined;
+        }
+        
+        await user?.save();
+        res.json({ message:"Delete image profile successfully" });
       } catch (error) {
         res.status(500).send({message:error});
       }
