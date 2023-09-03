@@ -13,6 +13,7 @@ export interface IFile {
   url: string
   size: number
   type: string
+  memo?: string
 }
 
 interface IFileDocument extends IFile, Document, SchemaTimestampsConfig {
@@ -41,6 +42,9 @@ const fileSchema = new Schema<IFileDocument, IFileDocument>(
     type: {
       type: String,
       required: true,
+    },
+    memo: {
+      type: String,
     },
   },
   { timestamps: true },

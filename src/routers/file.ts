@@ -28,6 +28,7 @@ router.post('/create', async (req, res) => {
     url: 'https://firebasestorage.google',
     size: 1,
     type: 'pdf',
+    memo: createData.data.memo,
   })
   if (result) {
     return res.status(200).send(result)
