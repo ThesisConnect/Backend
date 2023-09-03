@@ -22,12 +22,11 @@ router.post('/create', async (req, res) => {
   if (!createData.success) {
     return res.status(400).send('Body not match')
   }
-  // TODO: Upload createData.data.data to firebase and get url
   const result = await File.create({
     name: createData.data.name,
-    url: 'https://firebasestorage.google',
-    size: 1,
-    type: 'pdf',
+    url: createData.data.url,
+    size: createData.data.size,
+    type: createData.data.type,
     memo: createData.data.memo,
   })
   if (result) {
