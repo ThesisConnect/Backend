@@ -3,6 +3,7 @@ import Project from '../models/project'
 import User from '../models/user'
 import Summary from '../models/summary'
 import Plan from '../models/plan'
+import folder from '../models/folder'
 
 const router = express.Router()
 router.get('/main', async (req, res) => {
@@ -135,4 +136,62 @@ router.get('/gantt/:id', async (req, res) => {
   return res.status(400).send('Bad request')
 })
 
+router.get('/file/:id', async (req, res) => {
+  if (req.params.id) {
+    const getUsers = function (users: string[]) {
+      return Promise.all(
+        users.map(async (id) => {
+          const user = await User.findById(id)
+          if (user) {
+            return {
+              id: user._id,
+              name: user.name,
+              surname: user.surname,
+              avatar: user.avatar,
+            }
+          }
+        }),
+      )
+    }
+    const folders = await folder.find(
+      { shared: { $in: req.params.id } },
+      { parent: null}
+    )
+    const data = await Promise.all(
+      folders.map(async (folder) => {
+        return {
+          id: folder._id,
+          name: folder.name,
+          child: folder.child,
+          share: await getUsers(folder.shared),
+          date_modified: folder.updatedAt,
+        }
+      }),
+    )
+    return res.status(200).send(data)
+  }
+  return res.status(400).send('Bad request')
+})
+/*
+{
+  "parent_id":1,
+  "directory": [
+    {
+      "folder":{
+        "id":1,
+        "name":"test",
+        "child":"test_child",
+        "share":[
+          {
+              "id": "4a693fc0-e0e7-401d-9e27-761a9053e503",
+              "avatar": "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50",
+              "name": "John Doe"
+          }
+        ],
+      }
+      ]
+    }
+  ]
+}
+*/
 export default router

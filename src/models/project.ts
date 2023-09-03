@@ -22,6 +22,7 @@ export interface IProject {
   co_advisors: string[]
   advisee: string[]
   chat_id: string
+  folder_id: string
 }
 
 interface IProjectDocument extends IProject, Document, SchemaTimestampsConfig {
@@ -77,6 +78,10 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>(
       type: String,
       required: true,
     },
+    folder_id: {
+      type: String,
+      required: true,
+    }
   },
   { timestamps: true },
 )

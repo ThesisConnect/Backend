@@ -4,6 +4,7 @@ import Project from '../models/project'
 import { createSchema, editSchema } from '../schema/project'
 import { uuidv4 } from '@firebase/util'
 import Chat from '../models/chat'
+import Folder from '../models/folder'
 
 const router = express.Router()
 router.get('/data/:id', async (req, res) => {
@@ -43,12 +44,20 @@ router.post('/create', async (req, res) => {
   if (!chat) {
     return res.status(500).send('Internal server error')
   }
+  const folder= await Folder.create({
+    name: createData.data.name,
+    shared: [...createData.data.advisors, ...createData.data.co_advisors, ...createData.data.advisee],
+  })
+  if (!folder) {
+    return res.status(500).send('Internal server error')
+  }
   const result = await Project.create({
     name: createData.data.name,
     advisors: createData.data.advisors,
     co_advisors: createData.data.co_advisors,
     advisee: createData.data.advisee,
     chat_id: chat._id,
+    folder_id: folder._id,
   })
   if (result) {
     return res.status(200).send(result)
