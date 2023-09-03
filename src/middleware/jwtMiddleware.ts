@@ -22,7 +22,7 @@ const jwtMiddleware = async (
     if (!decoded) throw new Error('Validation failed!')
     req.user = {
       uid: decoded.uid,
-      email: decoded.email!,
+      email: decoded.email!
     }
     next()
   } catch (error) {

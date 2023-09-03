@@ -20,12 +20,9 @@ router.post('/login', login)
 router.post('/register', register)
 
 router.post('/update/profile', jwtMiddleware, updateProfile)
-router.get('/update/profileImage', jwtMiddleware, updateImageProfileUrl)
-router.delete(
-  '/update/deleteProfileImage',
-  jwtMiddleware,
-  updateImageProfileUrl,
-)
+router.post('/update/profileImage', jwtMiddleware, updateImageProfileUrl)
+router.post('/update/deleteProfileImage', jwtMiddleware, updateImageProfileUrl)
+
 
 router.get('/logout', logout)
 
