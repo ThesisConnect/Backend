@@ -2,6 +2,8 @@ import express from 'express'
 import * as _ from 'lodash'
 import Folder from '../models/folder'
 import { createSchema, editSchema } from '../schema/folder'
+import User from '../models/user'
+import File from '../models/file'
 
 const router = express.Router()
 
@@ -12,8 +14,44 @@ router.get('/data/:id', async (req, res) => {
       res.status(400).send({ found: false })
       return
     }
-    const sentData = { ...folder.toObject(), found: true }
-    return res.status(200).send(_.omit(sentData, ['_id', '__v']))
+    const data = {
+      id: folder._id,
+      name: folder.name,
+      parent: folder.parent,
+      child: folder.child,
+      files: await Promise.all(
+        folder.files.map(async (id) => {
+          const file = await File.findById(id)
+          if (!file) {
+            return
+          }
+          return {
+            id: file._id,
+            name: file.name,
+            url: file.url,
+            size: file.size,
+            type: file.type,
+            memo: file.memo,
+          }
+        }),
+      ),
+      shared: await Promise.all(
+        folder.shared.map(async (id) => {
+          const user = await User.findById(id)
+          if (!user) {
+            return
+          }
+          return {
+            id: user._id,
+            name: user.name,
+            surname: user.surname,
+            avatar: user.avatar,
+          }
+        }),
+      ),
+      date_modified: folder.updatedAt,
+    }
+    return res.status(200).send(data)
   }
 })
 
