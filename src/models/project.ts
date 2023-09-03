@@ -81,7 +81,7 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>(
     folder_id: {
       type: String,
       required: true,
-    }
+    },
   },
   { timestamps: true },
 )

@@ -155,7 +155,7 @@ router.get('/file/:id', async (req, res) => {
     }
     const folders = await folder.find(
       { shared: { $in: req.params.id } },
-      { parent: null}
+      { parent: null },
     )
     const data = await Promise.all(
       folders.map(async (folder) => {

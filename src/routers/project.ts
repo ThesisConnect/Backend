@@ -44,9 +44,13 @@ router.post('/create', async (req, res) => {
   if (!chat) {
     return res.status(500).send('Internal server error')
   }
-  const folder= await Folder.create({
+  const folder = await Folder.create({
     name: createData.data.name,
-    shared: [...createData.data.advisors, ...createData.data.co_advisors, ...createData.data.advisee],
+    shared: [
+      ...createData.data.advisors,
+      ...createData.data.co_advisors,
+      ...createData.data.advisee,
+    ],
   })
   if (!folder) {
     return res.status(500).send('Internal server error')
