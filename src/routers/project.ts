@@ -62,7 +62,7 @@ router.put('/edit', async (req, res) => {
   if (!editData.success) {
     return res.status(400).send('Bad request')
   }
-  const result = await Project.findByIdAndUpdate(editData.data._id, {
+  const result = await Project.findByIdAndUpdate(editData.data.id, {
     name: editData.data.name,
     advisors: editData.data.advisors,
     co_advisors: editData.data.co_advisors,

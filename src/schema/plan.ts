@@ -10,7 +10,7 @@ export const createSchema = z.object({
 })
 
 export const editSchema = z.object({
-  _id: z.string(),
+  id: z.string(),
   name: z.string().optional(),
   description: z.string().optional(),
   progress: z.number(),

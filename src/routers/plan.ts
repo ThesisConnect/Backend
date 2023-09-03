@@ -64,7 +64,7 @@ router.put('/edit', async (req, res) => {
   if (!editData.success) {
     return res.status(400).send('Body not match')
   }
-  const result = await Plan.findByIdAndUpdate(editData.data._id, {
+  const result = await Plan.findByIdAndUpdate(editData.data.id, {
     name: editData.data.name,
     description: editData.data.description,
     progress: editData.data.progress,

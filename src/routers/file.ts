@@ -1,7 +1,7 @@
 import express from 'express'
 import * as _ from 'lodash'
 import File from '../models/file'
-import { createSchema } from '../schema/file'
+import { createSchema, editSchema } from '../schema/file'
 
 const router = express.Router()
 
@@ -31,7 +31,31 @@ router.post('/create', async (req, res) => {
   })
   if (result) {
     return res.status(200).send(result)
-  } else {
+  }
+  return res.status(400).send('Bad request')
+})
+
+router.put('/edit', async (req, res) => {
+  const editData = editSchema.safeParse(req.body)
+  if (!editData.success) {
+    return res.status(400).send('Body not match')
+  }
+  const result = await File.findByIdAndUpdate(editData.data.id, {
+    name: editData.data.name,
+    memo: editData.data.memo,
+  })
+  if (result) {
+    return res.status(200).send(result)
+  }
+  return res.status(400).send('Bad request')
+})
+
+router.delete('/delete/:id', async (req, res) => {
+  if (req.params.id) {
+    const result = await File.findByIdAndDelete(req.params.id)
+    if (!result) {
+      return res.status(200).send(result)
+    }
     return res.status(400).send('Bad request')
   }
 })

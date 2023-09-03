@@ -8,7 +8,7 @@ export const createSchema = z.object({
 })
 
 export const editSchema = z.object({
-  _id: z.string(),
+  id: z.string(),
   name: z.string().optional(),
   advisors: z.array(z.string()),
   co_advisors: z.array(z.string()),
