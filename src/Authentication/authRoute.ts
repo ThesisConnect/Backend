@@ -21,7 +21,11 @@ router.post('/register', register)
 
 router.post('/update/profile', jwtMiddleware, updateProfile)
 router.get('/update/profileImage', jwtMiddleware, updateImageProfileUrl)
-router.delete('/update/deleteProfileImage', jwtMiddleware, updateImageProfileUrl)
+router.delete(
+  '/update/deleteProfileImage',
+  jwtMiddleware,
+  updateImageProfileUrl,
+)
 
 router.get('/logout', logout)
 
@@ -47,4 +51,3 @@ export default router
 //     }
 //   }
 // )
-

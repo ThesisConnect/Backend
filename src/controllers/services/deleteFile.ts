@@ -8,8 +8,8 @@ async function deleteFile(directory: string, filename: string) {
     console.log(`gs://${bucket.name}/${filePath} deleted.`)
     return true
   } catch (error) {
-    console.error('Error deleting file:', error);
-    throw new Error("Error deleting file")
+    console.error('Error deleting file:', error)
+    throw new Error('Error deleting file')
   }
 }
 export default deleteFile
