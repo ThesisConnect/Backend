@@ -19,7 +19,7 @@ const updateProfile = async (req: Request, res: Response) => {
     user.name = req.body.name || user.name
     user.surname = req.body.surname || user.surname
     user.username = req.body.username || user.username
-    user.avatar = req.body.avatar || user.avatar
+    user.avatar = req.body.avatar
     await user.save()
     const sentData = {
       ...user.toObject(),
