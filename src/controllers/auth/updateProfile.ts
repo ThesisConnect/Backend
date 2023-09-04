@@ -16,15 +16,14 @@ const updateProfile = async (req: Request, res: Response) => {
     if (!user) {
       throw new Error('User not found!')
     }
-    user.name = req.body.name
-    user.surname = req.body.surname
-    user.username = req.body.username
-    user.avatar = req.body.avatar
+    user.name = req.body.name || user.name
+    user.surname = req.body.surname || user.surname
+    user.username = req.body.username || user.username
+    user.avatar = req.body.avatar || user.avatar
     await user.save()
     const sentData = {
       ...user.toObject(),
       email,
-      message: 'Update profile successfully',
       isAuthenticated: true,
     }
     if (req.body.newpassword) {
