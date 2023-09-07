@@ -30,7 +30,7 @@ router.get('/data/:id', async (req, res) => {
             name: file.name,
             url: file.url,
             size: file.size,
-            type: file.type,
+            type: file.fileType,
             memo: file.memo,
           }
         }),

@@ -12,13 +12,12 @@ export interface IFile {
   name: string
   url: string
   size: number
-  type_file: string
+  fileType: string
   memo?: string
-  type:"file"
 
 }
 
-interface IFileDocument extends IFile, Document, SchemaTimestampsConfig {
+export interface IFileDocument extends IFile, Document, SchemaTimestampsConfig {
   _id: string
 }
 
@@ -27,12 +26,7 @@ const fileSchema = new Schema<IFileDocument, IFileDocument>(
   {
     _id: {
       type: String,
-      default: uuidv4(),
-    },
-    type:{
-      type: String,
-      enum: ["file"],
-      default: "file",
+      default: ()=>uuidv4(),
     },
     name: {
       type: String,
@@ -46,7 +40,7 @@ const fileSchema = new Schema<IFileDocument, IFileDocument>(
       type: Number,
       required: true,
     },
-    type_file: {
+    fileType: {
       type: String,
       required: true,
     },

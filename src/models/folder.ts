@@ -6,15 +6,15 @@ import {
   SchemaTimestampsConfig,
 } from 'mongoose'
 import { uuidv4 } from '@firebase/util'
+import { IFileDocument } from './file'
 
 export interface IFolder {
   _id: string
   name: string
   parent?: string
-  child: string[]
-  files: string[]
+  child: string[]| IFolderDocument[]
+  files: string[]| IFileDocument[]
   shared: string[]
-  type?: "folder"
 }
 
 interface IFolderDocument extends IFolder, Document, SchemaTimestampsConfig {
@@ -27,11 +27,6 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
     _id: {
       type: String,
       default: ()=>uuidv4(),
-    },
-    type:{
-      type: String,
-      enum: ["folder"],
-      default: "folder",
     },
     name: {
       type: String,
