@@ -14,6 +14,7 @@ export interface IFolder {
   child: string[]
   files: string[]
   shared: string[]
+  type?: "folder"
 }
 
 interface IFolderDocument extends IFolder, Document, SchemaTimestampsConfig {
@@ -26,6 +27,11 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
     _id: {
       type: String,
       default: ()=>uuidv4(),
+    },
+    type:{
+      type: String,
+      enum: ["folder"],
+      default: "folder",
     },
     name: {
       type: String,
