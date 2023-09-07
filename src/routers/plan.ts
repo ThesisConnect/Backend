@@ -19,43 +19,47 @@ router.get('/data/:id', async (req, res) => {
 })
 
 router.post('/create', async (req, res) => {
-  const createData = createSchema.safeParse(req.body)
-  if (!createData.success) {
-    return res.status(400).send('Body not match')
-  }
-  const project = await Project.findById(createData.data.project_id)
-  if (!project) {
-    return res.status(400).send('Project not found')
-  }
-  let chat: IChat | null = null
-  let folder: IFolder | null = null
-  if (req.body.task) {
-    chat = await Chat.create({})
-    if (!chat) {
-      return res.status(500).send('Internal server error')
+  try {
+    const createData = createSchema.safeParse(req.body)
+    if (!createData.success) {
+      return res.status(400).send('Body not match')
     }
-    folder = await Folder.create({
+    const project = await Project.findById(createData.data.project_id)
+    if (!project) {
+      return res.status(400).send('Project not found')
+    }
+    let chat: IChat | null = null
+    let folder: IFolder | null = null
+    if (req.body.task) {
+      chat = await Chat.create({})
+      if (!chat) {
+        return res.status(500).send('Internal server error')
+      }
+      folder = await Folder.create({
+        name: createData.data.name,
+        shared: [...project.advisors, ...project.co_advisors, ...project.advisee],
+      })
+      if (!folder) {
+        return res.status(500).send('Internal server error')
+      }
+    }
+    const result = await Plan.create({
+      project_id: createData.data.project_id,
       name: createData.data.name,
-      shared: [...project.advisors, ...project.co_advisors, ...project.advisee],
+      description: createData.data.description,
+      start_date: createData.data.start_date,
+      end_date: createData.data.end_date,
+      task: createData.data.task,
+      chat_id: req.body.task ? chat?._id : null,
+      folder_id: req.body.task ? folder?._id : null,
     })
-    if (!folder) {
-      return res.status(500).send('Internal server error')
+    if (result) {
+      return res.status(200).send(result)
+    } else {
+      return res.status(400).send('Create failed')
     }
-  }
-  const result = await Plan.create({
-    project_id: createData.data.project_id,
-    name: createData.data.name,
-    description: createData.data.description,
-    start_date: createData.data.start_date,
-    end_date: createData.data.end_date,
-    task: createData.data.task,
-    chat_id: req.body.task ? chat?._id : null,
-    folder_id: req.body.task ? folder?._id : null,
-  })
-  if (result) {
-    return res.status(200).send(result)
-  } else {
-    return res.status(400).send('Create failed')
+  } catch (error) {
+    return res.status(500).send('Internal server error')
   }
 })
 
