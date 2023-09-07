@@ -39,12 +39,10 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
     child: {
       type: [String],
       default: [],
-      required: true,
     },
     files: {
       type: [String],
       default: [],
-      required: true,
     },
     shared: {
       type: [String],
