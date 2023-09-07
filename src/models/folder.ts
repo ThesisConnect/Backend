@@ -48,7 +48,6 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
     },
     shared: {
       type: [String],
-      required: true,
     },
   },
   { timestamps: true },
