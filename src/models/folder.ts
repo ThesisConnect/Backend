@@ -25,7 +25,7 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
   {
     _id: {
       type: String,
-      default: uuidv4(),
+      default: ()=>uuidv4(),
     },
     name: {
       type: String,
@@ -36,16 +36,21 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
       default: null,
       required: true,
     },
-    child: {
-      type: [String],
-      default: [],
-    },
-    files: {
-      type: [String],
-      default: [],
-    },
+    child:[
+      {
+        type: String,
+        ref: 'Folder',
+      }
+    ] ,
+    files:[
+      {
+        type: String,
+        ref: 'File',
+      }
+    ],
     shared: {
       type: [String],
+      required: true,
     },
   },
   { timestamps: true },

@@ -6,18 +6,15 @@ import { createSchema, editSchema } from '../schema/file'
 
 const router = express.Router()
 //extra
-router.post('/data/list', async (req, res) => {
+router.get('/data/:folderId', async (req, res) => {
   try {
-    const folderAndFileID: string[] | undefined = req.body.folderAndFileID
-    if (folderAndFileID) {
-      const folder = await Folder.find({ _id: { $in: folderAndFileID } })
-      const files = await File.find({ _id: { $in: folderAndFileID } })
-      const data = [...folder, ...files]
-      if (folder || files) {
-        return res.status(200).send(data)
-      }
-      return res.status(400).send('Not found')
+    const folderID: string = req.params.folderId
+    const folder = await Folder.findById(folderID).populate("files child")
+    if (folder) {
+      const {child, files} = folder
+      return res.status(200).send([...child, ...files])
     }
+    return res.status(400).send("Folder not found")
   } catch (err) {
     console.log(err)
     return res.status(400).send('Bad request')

@@ -18,6 +18,6 @@ router.use('/summary', summary)
 router.use('/folder', folder)
 router.use('/file', file)
 router.use('/page', page)
-router.use("/folderAndFile", folderAndFile)
+router.use("/folderExtra", folderAndFile)
 
 export default router
