@@ -76,6 +76,7 @@ router.post('/create', async (req, res) => {
         ],
         parent: root_folder
       })
+      root_folder.child.push(child_folder._id)
       if (!child_folder) {
         return res.status(500).send('Internal server error')
       }
@@ -136,7 +137,8 @@ router.put('/edit', async (req, res) => {
 
 router.delete('/delete/:id', async (req, res) => {
   try {
-    const result = await Project.findByIdAndDelete(req.params.id)
+    const project = await Project.findById(req.params.id)
+    const result = await project?.deleteOne()
     if (result) {
       return res.status(200).send('OK')
     } else {
