@@ -6,9 +6,10 @@ import {
   SchemaTimestampsConfig,
 } from 'mongoose'
 import { uuidv4 } from '@firebase/util'
-import Project from '../models/project'
+import Summary from '../models/summary'
 import Chat from '../models/chat'
 import Folder from '../models/folder'
+import Plan from '../models/plan'
 
 export interface IStatus {
   id: number
@@ -96,12 +97,21 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>(
 
 projectSchema.pre('deleteOne', {document: true}, async function(next) {
   try {
+    const rootFolder = Folder.findById(this.folder_id)
+    const All_summary = await Summary.find({project_id: this._id})
+    const All_plan = await Plan.find({project_id: this._id})
+    await rootFolder?.deleteOne()
     await Chat.findByIdAndDelete(this.chat_id)
-    await Folder.findByIdAndDelete(this.folder_id)
+    await Plan.deleteMany({project_id: this._id})
+    for (let summary of All_summary) {
+      await summary.deleteOne()
+    }
+    for (let plan of All_plan) {
+      await plan.deleteOne()
+    }
   } catch(err) {
     console.log(err)
   }
-
 });
 
 

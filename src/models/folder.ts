@@ -6,9 +6,8 @@ import {
   SchemaTimestampsConfig,
 } from 'mongoose'
 import { uuidv4 } from '@firebase/util'
-import Project from '../models/project'
-import Chat from '../models/chat'
 import Folder from '../models/folder'
+import File from '../models/file'
 
 export interface IFolder {
   _id: string
@@ -59,8 +58,18 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
 )
 
 folderSchema.pre('deleteOne', {document: true}, async function(next) {
-  console.log(this)
+  try {
+  for (let file_id of this.files) {
+    await File.findByIdAndDelete(file_id)
+  }
+  for (let child_id of this.child) {
+    const childFolder = await Folder.findById(child_id)
+    await childFolder?.deleteOne()
+  }
   next()
+} catch (error) {
+  console.log(error)
+}
 });
 
 export default model<IFolderDocument, IFolderModel>('Folder', folderSchema)

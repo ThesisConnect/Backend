@@ -6,6 +6,7 @@ import {
   SchemaTimestampsConfig,
 } from 'mongoose'
 import { uuidv4 } from '@firebase/util'
+import File from '../models/file'
 
 export interface ISummary {
   _id: string
@@ -15,7 +16,7 @@ export interface ISummary {
   sender_id: string
   comment: string
   progress: number
-  file_id: string[]
+  files: string[]
   chat_id: string
 }
 
@@ -58,7 +59,7 @@ const summarySchema = new Schema<ISummaryDocument, ISummaryDocument>(
       type: Number,
       required: true,
     },
-    file_id: {
+    files: {
       type: [String],
       ref: 'File',
       required: true,
@@ -71,5 +72,11 @@ const summarySchema = new Schema<ISummaryDocument, ISummaryDocument>(
   },
   { timestamps: true },
 )
+
+summarySchema.pre('deleteOne', {document: true}, async function(next) {
+  for (let file_id of this.files) {
+    File.findByIdAndDelete(file_id)
+  }
+});
 
 export default model<ISummaryDocument, ISummaryModel>('Summary', summarySchema)
