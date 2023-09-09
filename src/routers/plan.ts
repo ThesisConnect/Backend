@@ -12,10 +12,12 @@ router.get('/:id', async (req, res) => {
     if (!id) {
       return res.status(400).send('Bad request')
     }
+
     const plan = await Plan.findById(id).populate<{ project_id: IProject}>('project_id')
     if (plan) {
       return res.status(200).send(plan)
     }
+
     return res.status(404).send("Not found")
   } catch (error) {
     return res.status(500).send(error)
@@ -28,10 +30,12 @@ router.post('/create', async (req, res) => {
     if (!createData.success) {
       return res.status(400).send('Body not match')
     }
+
     const project = await Project.findById(createData.data.project_id)
     if (!project) {
       return res.status(404).send('Project not found')
     }
+
     let chat: IChat | null = null
     let folder: IFolder | null = null
     if (req.body.task) {
@@ -39,6 +43,19 @@ router.post('/create', async (req, res) => {
       if (!chat) {
         return res.status(500).send('Failed to create chat')
       }
+
+      const parent = await Folder.findOne({
+        $and: [
+          {parent: project.folder_id},
+          {name: 'All task'}
+        ]
+      })
+
+      if (!parent) {
+        await Chat.findByIdAndDelete(chat._id)
+        return res.status(404).send('Parent not found')
+      }
+
       folder = await Folder.create({
         name: createData.data.name,
         shared: [
@@ -46,11 +63,18 @@ router.post('/create', async (req, res) => {
           ...project.co_advisors,
           ...project.advisee,
         ],
+        parent: parent._id,
       })
+
       if (!folder) {
         return res.status(500).send('Failed to create folder')
       }
+
+      await parent.updateOne({
+        $addToSet: { child: folder._id }
+      })
     }
+
     const result = await Plan.create({
       project_id: createData.data.project_id,
       name: createData.data.name,
@@ -61,9 +85,32 @@ router.post('/create', async (req, res) => {
       chat_id: req.body.task ? chat?._id : null,
       folder_id: req.body.task ? folder?._id : null,
     })
+
     if (result) {
       return res.status(200).send(result)
     }
+
+    if (chat) {
+      await Chat.findByIdAndDelete(chat._id)
+    }
+    if (folder) {
+      const f = await Folder.findById(folder._id)
+      await f?.deleteOne();
+
+      const parent = await Folder.findOne({
+        $and: [
+          {parent: project.folder_id},
+          {name: 'All task'}
+        ]
+      })
+
+      if (parent) {
+        await parent.updateOne({
+          $pull: { child: folder._id }
+        })
+      }
+    }
+
     return res.status(500).send('Failed to create plan')
   } catch (error) {
     return res.status(500).send(error)
