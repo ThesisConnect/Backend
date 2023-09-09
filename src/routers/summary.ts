@@ -1,5 +1,4 @@
 import express from 'express'
-import * as _ from 'lodash'
 import Summary from '../models/summary'
 import { createSchema } from '../schema/summary'
 
@@ -63,30 +62,30 @@ router.get('/:id', async (req, res) => {
  *             properties:
  *               project_id:
  *                 type: string
- *                 description: ID of project 
+ *                 description: ID of the project
  *               plan_id:
  *                 type: string
- *                 description: ID of plan
+ *                 description: ID of the plan
  *               reciever_id:
  *                 type: string
- *                 description: reciever's user_id
+ *                 description: ID of the user
  *               sender_id:
  *                 type: string
- *                 description: sender's user_id
+ *                 description: ID of the user
  *               comment:
  *                 type: string
- *                 description: comment of the summary
+ *                 description: Comment of the summary
  *               file_id:
  *                 type: array
  *                 items:
  *                   type: string
- *                 description: file ID of that summary
+ *                   description: ID of the file
  *               chat_id:
  *                 type: string
- *                 description: chat ID of that summary
+ *                 description: ID of the chat
  *               progress:
  *                 type: number
- *                 description: progress of the plan
+ *                 description: Progress of the plan
  *             required: [project_id, plan_id, reciever_id, sender_id, comment, file_id, chat_id, progress]
  *     responses:
  *       200:

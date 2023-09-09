@@ -69,7 +69,7 @@ router.get('/:id', async (req, res) => {
  *             properties:
  *               name:
  *                 type: string
- *                 description: New name of the file
+ *                 description: Name of the file
  *               parent:
  *                 type: string
  *                 description: ID of the parent folder

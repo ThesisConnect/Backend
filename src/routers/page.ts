@@ -1,12 +1,30 @@
 import express from 'express'
-import Project, {IProject} from '../models/project'
-import User, {IUser} from '../models/user'
+import Project from '../models/project'
+import {IUser} from '../models/user'
 import Summary from '../models/summary'
 import Plan, {IPlan} from '../models/plan'
 import folder from '../models/folder'
-import file, {IFile} from '../models/file'
+import {IFile} from '../models/file'
 
 const router = express.Router()
+
+/**
+ * @swagger
+ * /page/main:
+ *   get:
+ *     tags:
+ *       - page
+ *     summary: Fetch main page data
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/main', async (req, res) => {
   try {
     const uid = req.user?.uid
@@ -28,6 +46,30 @@ router.get('/main', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /page/summary/{id}:
+ *   get:
+ *     tags:
+ *       - page
+ *     summary: Fetch summary page data
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the project
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/summary/:id', async (req, res) => {
   try {
     const id = req.params?.id
@@ -43,6 +85,30 @@ router.get('/summary/:id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /page/plan/{id}:
+ *   get:
+ *     tags:
+ *       - page
+ *     summary: Fetch plan page data
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the project
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/plan/:id', async (req, res) => {
   try {
     const id = req.params?.id
@@ -60,6 +126,30 @@ router.get('/plan/:id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /page/gantt/{id}:
+ *   get:
+ *     tags:
+ *       - page
+ *     summary: Fetch gantt page data
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the project
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/gantt/:id', async (req, res) => {
   try {
     const id = req.params?.id
@@ -78,6 +168,30 @@ router.get('/gantt/:id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /page/file/{id}:
+ *   get:
+ *     tags:
+ *       - page
+ *     summary: Fetch file page data
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/file/:id', async (req, res) => {
   try {
     const id = req.params?.id

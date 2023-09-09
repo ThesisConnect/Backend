@@ -1,15 +1,36 @@
 import express from 'express'
-import * as _ from 'lodash'
 import Project from '../models/project'
 import { createSchema, editSchema } from '../schema/project'
-import { uuidv4 } from '@firebase/util'
 import Chat from '../models/chat'
 import Folder from '../models/folder'
-import User, { IUser } from "../models/user"
-import Summary from '../models/summary'
-import Plan from '../models/plan'
+import { IUser } from "../models/user"
 
 const router = express.Router()
+
+/**
+ * @swagger
+ * /project/{id}:
+ *   get:
+ *     tags:
+ *       - Project
+ *     summary: Fetch data by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the project
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/:id', async (req, res) => {
   try {
     const id = req.params?.id
@@ -28,6 +49,30 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /project/users/{id}:
+ *   get:
+ *     tags:
+ *       - Project
+ *     summary: Fetch users by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the project
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/users/:id', async (req, res) => {
   try {
     const id = req.params?.id
@@ -51,6 +96,49 @@ router.get('/users/:id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /project/create:
+ *   post:
+ *     tags:
+ *       - Project
+ *     summary: Create a new folder
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Name of the project
+ *               advisors:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: ID of the user
+ *               co_advisors:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: ID of the user
+ *               advisee:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: ID of the user
+ *             required: [name, advisors, co_advisors, advisee]
+ *     responses:
+ *       200:
+ *         description: Created
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.post('/create', async (req, res) => {
   try {
     const createData = createSchema.safeParse(req.body)
@@ -141,6 +229,52 @@ router.post('/create', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /project/edit:
+ *   put:
+ *     tags:
+ *       - Project
+ *     summary: Edit project data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: ID of the project
+ *               name:
+ *                 type: string
+ *                 description: New name of the project
+ *               advisors:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: ID of the user
+ *               co_advisors:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: ID of the user
+ *               advisee:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: ID of the user
+ *             required: [id, advisors, co_advisors, advisee]
+ *     responses:
+ *       200:
+ *         description: Edited
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.put('/edit', async (req, res) => {
   try {
     const editData = editSchema.safeParse(req.body)
@@ -165,6 +299,30 @@ router.put('/edit', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /project/delete/{id}:
+ *   delete:
+ *     tags:
+ *       - Project
+ *     summary: Delete project by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the project
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Deleted
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.delete('/delete/:id', async (req, res) => {
   try {
     const id = req.params?.id

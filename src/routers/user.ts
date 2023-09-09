@@ -1,21 +1,21 @@
 import express from 'express'
 import User from '../models/user'
-import * as _ from 'lodash'
 import Project from '../models/project'
 
 const router = express.Router()
+
 /**
  * @swagger
- * /user/{uid}:
+ * /user/{id}:
  *   get:
  *     tags:
  *       - User
- *     summary: Fetch user data by uid
+ *     summary: Fetch data by id
  *     parameters:
- *       - name: uid
+ *       - name: id
  *         in: path
  *         required: true
- *         description: User ID
+ *         description: ID of the user
  *         schema:
  *           type: string
  *     responses:
@@ -28,14 +28,14 @@ const router = express.Router()
  *       500:
  *         description: Internal server error
  */
-router.get('/:uid', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const uid = req.params?.uid
-    if (!uid) {
+    const id = req.params?.id
+    if (!id) {
       return res.status(400).send('Bad request')
     }
 
-    const user = await User.findById(uid)
+    const user = await User.findById(id)
     if (user) {
       return res.status(200).send(user)
     }
@@ -48,16 +48,16 @@ router.get('/:uid', async (req, res) => {
 
 /**
  * @swagger
- * /user/project/{uid}:
+ * /user/project/{id}:
  *   get:
  *     tags:
  *       - User
- *     summary: Fetch project by uid
+ *     summary: Fetch projects by id
  *     parameters:
- *       - name: uid
+ *       - name: id
  *         in: path
  *         required: true
- *         description: User ID
+ *         description: ID of the user
  *         schema:
  *           type: string
  *     responses:
@@ -70,18 +70,18 @@ router.get('/:uid', async (req, res) => {
  *       500:
  *         description: Internal server error
  */
-router.get('/project/:uid', async (req, res) => {
+router.get('/project/:id', async (req, res) => {
   try {
-    const uid = req.params?.uid
-    if (!uid) {
+    const id = req.params?.id
+    if (!id) {
       return res.status(400).send('Bad request')
     }
 
     const projects = await Project.find({
       $or: [
-        { advisors: { $in: req.params.uid } },
-        { co_advisors: { $in: req.params.uid } },
-        { advisee: { $in: req.params.uid } },
+        { advisors: { $in: req.params.id } },
+        { co_advisors: { $in: req.params.id } },
+        { advisee: { $in: req.params.id } },
       ],
     })
 
@@ -104,14 +104,7 @@ router.get('/project/:uid', async (req, res) => {
  *   get:
  *     tags:
  *       - User
- *     summary: Fetch all user data by uid
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         description: User ID
- *         schema:
- *           type: string
+ *     summary: Fetch all data
  *     responses:
  *       200:
  *         description: Data
