@@ -59,7 +59,7 @@ router.post('/create', async (req, res) => {
       return res.status(400).send('Create failed')
     }
   } catch (error) {
-    return res.status(500).send('Internal server error')
+    return res.status(500).send(error)
   }
 })
 
