@@ -1,9 +1,10 @@
 import express from 'express'
-import Project from '../models/project'
-import User from '../models/user'
+import Project, {IProject} from '../models/project'
+import User, {IUser} from '../models/user'
 import Summary from '../models/summary'
-import Plan from '../models/plan'
+import Plan, {IPlan} from '../models/plan'
 import folder from '../models/folder'
+import file, {IFile} from '../models/file'
 
 const router = express.Router()
 router.get('/main', async (req, res) => {
@@ -12,43 +13,14 @@ router.get('/main', async (req, res) => {
     if (!uid) {
       return res.status(400).send('Bad request')
     }
-    const getUsers = function (users: string[]) {
-      return Promise.all(
-        users.map(async (id) => {
-          const user = await User.findById(id)
-          if (user) {
-            return {
-              id: user._id,
-              name: user.name,
-              surname: user.surname,
-              avatar: user.avatar,
-            }
-          }
-        }),
-      )
-    }
     const projects = await Project.find({
       $or: [
         { advisors: { $in: uid } },
         { co_advisors: { $in: uid } },
         { advisee: { $in: uid } },
       ],
-    })
-    const data = await Promise.all(
-      projects.map(async (project) => {
-        return {
-          id: project._id,
-          name: project.name,
-          progress: project.progress,
-          status: project.status,
-          advisors: await getUsers(project.advisors),
-          co_advisors: await getUsers(project.co_advisors),
-          advisee: await getUsers(project.advisee),
-          chat_id: project.chat_id,
-        }
-      }),
-    )
-    return res.status(200).send(data)
+    }).populate <{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>('advisors co_advisors advisee')
+    return res.status(200).send(projects)
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -57,39 +29,8 @@ router.get('/main', async (req, res) => {
 router.get('/summary/:id', async (req, res) => {
   try {
     if (req.params.id) {
-      const getUser = async function (id: string) {
-        const user = await User.findById(id)
-        if (user) {
-          return {
-            id: user._id,
-            name: user.name,
-            surname: user.surname,
-            avatar: user.avatar,
-          }
-        }
-      }
-      const summaries = await Summary.find({
-        project_id: req.params.id,
-      })
-      const data = await Promise.all(
-        summaries.map(async (summary) => {
-          const plan = await Plan.findById(summary.plan_id)
-          if (plan) {
-            return {
-              id: summary._id,
-              task: plan.name,
-              reciever: await getUser(summary.reciever_id),
-              sender: await getUser(summary.sender_id),
-              comment: summary.comment,
-              progress: summary.progress,
-              files: summary.file_id,
-              chat_id: plan.chat_id,
-              updated_at: summary.createdAt,
-            }
-          }
-        }),
-      )
-      return res.status(200).send(data)
+      const summaries = await Summary.find({project_id: req.params.id,}).populate<{ sender_id: IUser, reciever_id: IUser, plan_id: IPlan, file_id: IFile}>('sender_id reciever_id plan_id file_id')
+      return res.status(200).send(summaries)
     }
     return res.status(400).send('Bad request')
   } catch (error) {
@@ -103,20 +44,7 @@ router.get('/plan/:id', async (req, res) => {
       const plans = await Plan.find({
         project_id: req.params.id,
       })
-      const data = await Promise.all(
-        plans.map(async (plan) => {
-          return {
-            id: plan._id,
-            name: plan.name,
-            progress: plan.progress,
-            start_date: plan.start_date,
-            end_date: plan.end_date,
-            task: plan.task,
-            description: plan.description,
-          }
-        }),
-      )
-      return res.status(200).send(data)
+      return res.status(200).send(plans)
     }
     return res.status(400).send('Bad request')
   } catch (error) {
@@ -131,20 +59,7 @@ router.get('/gantt/:id', async (req, res) => {
         project_id: req.params.id,
         task: true,
       })
-      const data = await Promise.all(
-        plans.map(async (plan) => {
-          return {
-            id: plan._id,
-            chat_id: plan.chat_id,
-            name: plan.name,
-            progress: plan.progress,
-            start_date: plan.start_date,
-            end_date: plan.end_date,
-            description: plan.description,
-          }
-        }),
-      )
-      return res.status(200).send(data)
+      return res.status(200).send(plans)
     }
     return res.status(400).send('Bad request')
   } catch (error) {
@@ -154,38 +69,16 @@ router.get('/gantt/:id', async (req, res) => {
 
 router.get('/file/:id', async (req, res) => {
   try {
+    console.log("file page start")
     if (req.params.id) {
-      const getUsers = function (users: string[]) {
-        return Promise.all(
-          users.map(async (id) => {
-            const user = await User.findById(id)
-            if (user) {
-              return {
-                id: user._id,
-                name: user.name,
-                surname: user.surname,
-                avatar: user.avatar,
-              }
-            }
-          }),
-        )
-      }
-      const folders = await folder.find(
-        { shared: { $in: req.params.id } },
-        { parent: null },
-      )
-      const data = await Promise.all(
-        folders.map(async (folder) => {
-          return {
-            id: folder._id,
-            name: folder.name,
-            child: folder.child,
-            share: await getUsers(folder.shared),
-            date_modified: folder.updatedAt,
-          }
-        }),
-      )
-      return res.status(200).send(data)
+      console.log("user func")
+      const folders = await folder.find({
+        $and: [
+          {shared: { $in: req.params.id } },
+          {parent: null },]
+      }).populate<{ shared: IUser[]}>('shared')
+      console.log("folder find")
+      return res.status(200).send(folders)
     }
     return res.status(400).send('Bad request')
   } catch (error) {
