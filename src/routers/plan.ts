@@ -73,9 +73,9 @@ router.post('/create', async (req, res) => {
 
 router.put('/edit', async (req, res) => {
   try {
-    const editData = editSchema.safeParse(req.body)
+    const editData = editSchema.safeParse(req.body)    
     if (!editData.success) {
-      return res.status(400).send('Body not match')
+      return res.status(400).send('Body not match(Zod)')
     }
     const result = await Plan.findByIdAndUpdate(editData.data.id, {
       name: editData.data.name,

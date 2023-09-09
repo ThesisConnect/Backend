@@ -25,10 +25,6 @@ router.get("/:id", async (req, res) => {
 
 router.post("/create", async (req, res) => {
   try {
-    const uid = req.user?.uid;
-    if (!uid) {
-      return res.status(400).send("Bad request");
-    }
     const createData = createSchema.safeParse(req.body);
     if (!createData.success) {
       return res.status(400).send("Body not match");
@@ -68,7 +64,8 @@ router.put("/edit", async (req, res) => {
 router.delete("/delete/:id", async (req, res) => {
   try {
     if (req.params.id) {
-      const result = await Folder.findByIdAndDelete(req.params.id);
+      const folder = await Folder.findById(req.params.id)
+      const result = await folder?.deleteOne();
       if (result) {
         return res.status(200).send(result);
       }
