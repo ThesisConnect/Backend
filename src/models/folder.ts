@@ -18,7 +18,10 @@ export interface IFolder {
   shared: string[]
 }
 
-export interface IFolderDocument extends IFolder, Document, SchemaTimestampsConfig {
+export interface IFolderDocument
+  extends IFolder,
+    Document,
+    SchemaTimestampsConfig {
   _id: string
 }
 
@@ -57,19 +60,19 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
   { timestamps: true },
 )
 
-folderSchema.pre('deleteOne', {document: true}, async function(next) {
+folderSchema.pre('deleteOne', { document: true }, async function (next) {
   try {
-  for (let file_id of this.files) {
-    await File.findByIdAndDelete(file_id)
+    for (let file_id of this.files) {
+      await File.findByIdAndDelete(file_id)
+    }
+    for (let child_id of this.child) {
+      const childFolder = await Folder.findById(child_id)
+      await childFolder?.deleteOne()
+    }
+    next()
+  } catch (error) {
+    console.log(error)
   }
-  for (let child_id of this.child) {
-    const childFolder = await Folder.findById(child_id)
-    await childFolder?.deleteOne()
-  }
-  next()
-} catch (error) {
-  console.log(error)
-}
-});
+})
 
 export default model<IFolderDocument, IFolderModel>('Folder', folderSchema)

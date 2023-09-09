@@ -6,6 +6,31 @@ import Folder, { IFolder } from '../models/folder'
 import Project, { IProject } from '../models/project'
 
 const router = express.Router()
+
+/**
+ * @swagger
+ * /plan/{id}:
+ *   get:
+ *     tags:
+ *       - Plan
+ *     summary: Fetch data by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the plan
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/:id', async (req, res) => {
   try {
     const id = req.params?.id
@@ -24,6 +49,49 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /plan/create:
+ *   post:
+ *     tags:
+ *       - Plan
+ *     summary: Create a new plan
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               project_id:
+ *                 type: string
+ *                 description: ID of the project
+ *               name:
+ *                 type: string
+ *                 description: Name of the plan
+ *               description:
+ *                 type: string
+ *                 description: Description of the plan
+ *               start_date:
+ *                 type: string
+ *                 description: Start date of the plan
+ *               end_date:
+ *                 type: string
+ *                 description: End date of the plan
+ *               task:
+ *                 type: boolean
+ *                 description: True if the plan is a task otherwise false
+ *             required: [project_id, name, start_date, end_date, task]
+ *     responses:
+ *       200:
+ *         description: Created
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.post('/create', async (req, res) => {
   try {
     const createData = createSchema.safeParse(req.body)
@@ -118,6 +186,49 @@ router.post('/create', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /plan/edit:
+ *   put:
+ *     tags:
+ *       - Plan
+ *     summary: Edit plan data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: ID of the plan
+ *               name:
+ *                 type: string
+ *                 description: New name of the plan
+ *               description:
+ *                 type: string
+ *                 description: New description of the plan
+ *               progress:
+ *                 type: number
+ *                 description: New progress of the plan
+ *               start_date:
+ *                 type: string
+ *                 description: New start date of the plan
+ *               end_date:
+ *                 type: string
+ *                 description: New end date of the plan
+ *             required: [id, progress, start_date, end_date]
+ *     responses:
+ *       200:
+ *         description: Edited
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.put('/edit', async (req, res) => {
   try {
     const editData = editSchema.safeParse(req.body)    
@@ -143,6 +254,30 @@ router.put('/edit', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /plan/delete/{id}:
+ *   delete:
+ *     tags:
+ *       - Plan
+ *     summary: Delete plan by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the plan
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Deleted
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.delete('/delete/:id', async (req, res) => {
   try {
     const id = req.params?.id

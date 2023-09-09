@@ -73,10 +73,10 @@ const summarySchema = new Schema<ISummaryDocument, ISummaryDocument>(
   { timestamps: true },
 )
 
-summarySchema.pre('deleteOne', {document: true}, async function(next) {
+summarySchema.pre('deleteOne', { document: true }, async function (next) {
   for (let file_id of this.files) {
     File.findByIdAndDelete(file_id)
   }
-});
+})
 
 export default model<ISummaryDocument, ISummaryModel>('Summary', summarySchema)

@@ -117,5 +117,4 @@ projectSchema.pre('deleteOne', {document: true}, async function(next) {
   }
 });
 
-
 export default model<IProjectDocument, IProjectModel>('Project', projectSchema)

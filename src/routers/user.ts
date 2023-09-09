@@ -1,17 +1,41 @@
 import express from 'express'
 import User from '../models/user'
-import * as _ from 'lodash'
 import Project from '../models/project'
 
 const router = express.Router()
-router.get('/:uid', async (req, res) => {
+
+/**
+ * @swagger
+ * /user/{id}:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Fetch data by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:id', async (req, res) => {
   try {
-    const uid = req.params?.uid
-    if (!uid) {
+    const id = req.params?.id
+    if (!id) {
       return res.status(400).send('Bad request')
     }
 
-    const user = await User.findById(uid)
+    const user = await User.findById(id)
     if (user) {
       return res.status(200).send(user)
     }
@@ -22,18 +46,42 @@ router.get('/:uid', async (req, res) => {
   }
 })
 
-router.get('/project/:uid', async (req, res) => {
+/**
+ * @swagger
+ * /user/project/{id}:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Fetch projects by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the user
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/project/:id', async (req, res) => {
   try {
-    const uid = req.params?.uid
-    if (!uid) {
+    const id = req.params?.id
+    if (!id) {
       return res.status(400).send('Bad request')
     }
 
     const projects = await Project.find({
       $or: [
-        { advisors: { $in: req.params.uid } },
-        { co_advisors: { $in: req.params.uid } },
-        { advisee: { $in: req.params.uid } },
+        { advisors: { $in: req.params.id } },
+        { co_advisors: { $in: req.params.id } },
+        { advisee: { $in: req.params.id } },
       ],
     })
 
@@ -50,6 +98,23 @@ router.get('/project/:uid', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /user/:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Fetch all data
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/', async (req, res) => {
   try {
     const users = await User.find({})
