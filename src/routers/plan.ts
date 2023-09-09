@@ -93,6 +93,7 @@ router.post('/create', async (req, res) => {
     if (chat) {
       await Chat.findByIdAndDelete(chat._id)
     }
+
     if (folder) {
       const f = await Folder.findById(folder._id)
       await f?.deleteOne();
@@ -123,6 +124,7 @@ router.put('/edit', async (req, res) => {
     if (!editData.success) {
       return res.status(400).send('Body not match(Zod)')
     }
+
     const result = await Plan.findByIdAndUpdate(editData.data.id, {
       name: editData.data.name,
       description: editData.data.description,
@@ -130,9 +132,11 @@ router.put('/edit', async (req, res) => {
       start_date: editData.data.start_date,
       end_date: editData.data.end_date,
     })
+
     if (result) {
       return res.status(200).send(result)
     }
+
     return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
@@ -145,10 +149,13 @@ router.delete('/delete/:id', async (req, res) => {
     if (!id) {
       return res.status(400).send('Bad request')
     }
-    const result = await Plan.findByIdAndDelete(id)
+
+    const plan = await Plan.findById(id)
+    const result = await plan?.deleteOne()
     if (result) {
       return res.status(200).send(result)
     }
+
     return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
