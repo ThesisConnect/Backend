@@ -32,14 +32,14 @@ const chatSchema = new Schema<IChatDocument, IChatDocument>(
   {
     _id: {
       type: String,
-      default: uuidv4(),
+      default: ()=>uuidv4(),
     },
     messages: {
       type: [
         {
           _id: {
             type: String,
-            default: uuidv4(),
+            default: ()=>uuidv4(),
           },
           user_id: {
             type: String,
