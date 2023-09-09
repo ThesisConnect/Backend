@@ -32,18 +32,22 @@ const summarySchema = new Schema<ISummaryDocument, ISummaryDocument>(
     },
     project_id: {
       type: String,
+      ref: 'Project',
       required: true,
     },
     plan_id: {
       type: String,
+      ref: 'Plan',
       required: true,
     },
     reciever_id: {
       type: String,
+      ref: 'User',
       required: true,
     },
     sender_id: {
       type: String,
+      ref: 'User',
       required: true,
     },
     comment: {
@@ -56,10 +60,12 @@ const summarySchema = new Schema<ISummaryDocument, ISummaryDocument>(
     },
     file_id: {
       type: [String],
+      ref: 'File',
       required: true,
     },
     chat_id: {
       type: String,
+      ref: 'Chat',
       required: true,
     },
   },

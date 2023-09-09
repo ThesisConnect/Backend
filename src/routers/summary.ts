@@ -5,7 +5,7 @@ import { createSchema } from '../schema/summary'
 
 const router = express.Router()
 
-router.get('/data/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     if (req.params.id) {
       const summary = await Summary.findById(req.params.id)

@@ -12,7 +12,7 @@ export interface IFile {
   name: string
   url: string
   size: number
-  fileType: string
+  file_type: string
   memo?: string
 }
 
@@ -39,7 +39,7 @@ const fileSchema = new Schema<IFileDocument, IFileDocument>(
       type: Number,
       required: true,
     },
-    fileType: {
+    file_type: {
       type: String,
       required: true,
     },

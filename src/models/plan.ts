@@ -34,6 +34,7 @@ const planSchema = new Schema<IPlanDocument, IPlanDocument>(
     },
     project_id: {
       type: String,
+      ref: 'Project',
       required: true,
     },
     name: {
@@ -63,9 +64,11 @@ const planSchema = new Schema<IPlanDocument, IPlanDocument>(
     },
     chat_id: {
       type: String,
+      ref: 'Chat',
     },
     folder_id: {
       type: String,
+      ref: 'Folder',
     },
     archived: {
       type: Boolean,

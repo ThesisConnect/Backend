@@ -5,7 +5,7 @@ import { createSchema, editSchema } from '../schema/file'
 
 const router = express.Router()
 
-router.get('/data/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     if (req.params.id) {
       const file = await File.findById(req.params.id)

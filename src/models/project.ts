@@ -64,22 +64,27 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>(
     },
     advisors: {
       type: [String],
+      ref: 'User',
       required: true,
     },
     co_advisors: {
       type: [String],
+      ref: 'User',
       required: true,
     },
     advisee: {
       type: [String],
+      ref: 'User',
       required: true,
     },
     chat_id: {
       type: String,
+      ref: 'Chat',
       required: true,
     },
     folder_id: {
       type: String,
+      ref: 'Folder',
       required: true,
     },
   },

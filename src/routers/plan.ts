@@ -6,7 +6,7 @@ import Folder, { IFolder } from '../models/folder'
 import Project from '../models/project'
 
 const router = express.Router()
-router.get('/data/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     if (req.params.id) {
       const plan = await Plan.findById(req.params.id)

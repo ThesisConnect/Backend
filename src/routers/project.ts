@@ -7,7 +7,7 @@ import Chat from '../models/chat'
 import Folder from '../models/folder'
 
 const router = express.Router()
-router.get('/data/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     if (req.params.id) {
       const project = await Project.findById(req.params.id)

@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import Project from '../models/project'
 
 const router = express.Router()
-router.get('/data/:uid', async (req, res) => {
+router.get('/:uid', async (req, res) => {
   try {
     if (req.params.uid) {
       const user = await User.findById(req.params.uid)
