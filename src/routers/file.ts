@@ -70,13 +70,16 @@ router.get('/:id', async (req, res) => {
  *               size:
  *                 type: number
  *                 description: Size of the file
- *               type:
+ *               file_type:
  *                 type: string
  *                 description: Type of the file
+ *               folder_id:
+ *                 type: string
+ *                 description: ID of the folder
  *               memo:
  *                 type: string
  *                 description: Memo of the file
- *             required: [name, url, size, type]
+ *             required: [name, url, size, file_type, folder_id]
  *     responses:
  *       200:
  *         description: Created
@@ -103,14 +106,16 @@ router.post('/create', async (req, res) => {
     })
 
     if (result) {
-      if (createData.data.folder_id) {
-        const folder = await Folder.findById(createData.data.folder_id)
+      const folder_id = createData.data.folder_id
+      if (folder_id) {
+        const folder = await Folder.findById(folder_id)
         if (folder) {
           await folder.updateOne({
             $addToSet: { files: result._id },
           })
         }
       }
+
       return res.status(200).send(result)
     }
 

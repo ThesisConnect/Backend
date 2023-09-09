@@ -5,8 +5,8 @@ export const createSchema = z.object({
   url: z.string(),
   size: z.number(),
   file_type: z.string(),
-  memo: z.string().optional(),
   folder_id: z.string(),
+  memo: z.string().optional(),
 })
 
 export const editSchema = z.object({
