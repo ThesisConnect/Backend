@@ -5,6 +5,30 @@ import { createSchema } from '../schema/summary'
 
 const router = express.Router()
 
+/**
+ * @swagger
+ * /summary/{id}:
+ *   get:
+ *     tags:
+ *       - Summary
+ *     summary: Fetch data by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the summary
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/:id', async (req, res) => {
   try {
     const id = req.params?.id
@@ -23,6 +47,57 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /summary/create:
+ *   post:
+ *     tags:
+ *       - Summary
+ *     summary: Create a new summary
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               project_id:
+ *                 type: string
+ *                 description: ID of project 
+ *               plan_id:
+ *                 type: string
+ *                 description: ID of plan
+ *               reciever_id:
+ *                 type: string
+ *                 description: reciever's user_id
+ *               sender_id:
+ *                 type: string
+ *                 description: sender's user_id
+ *               comment:
+ *                 type: string
+ *                 description: comment of the summary
+ *               file_id:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: file ID of that summary
+ *               chat_id:
+ *                 type: string
+ *                 description: chat ID of that summary
+ *               progress:
+ *                 type: number
+ *                 description: progress of the plan
+ *             required: [project_id, plan_id, reciever_id, sender_id, comment, file_id, chat_id, progress]
+ *     responses:
+ *       200:
+ *         description: Created
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.post('/create', async (req, res) => {
   try {
     const createData = createSchema.safeParse(req.body)

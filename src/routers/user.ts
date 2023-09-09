@@ -4,6 +4,30 @@ import * as _ from 'lodash'
 import Project from '../models/project'
 
 const router = express.Router()
+/**
+ * @swagger
+ * /user/{uid}:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Fetch user data by uid
+ *     parameters:
+ *       - name: uid
+ *         in: path
+ *         required: true
+ *         description: User ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/:uid', async (req, res) => {
   try {
     const uid = req.params?.uid
@@ -22,6 +46,30 @@ router.get('/:uid', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /user/project/{uid}:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Fetch project by uid
+ *     parameters:
+ *       - name: uid
+ *         in: path
+ *         required: true
+ *         description: User ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/project/:uid', async (req, res) => {
   try {
     const uid = req.params?.uid
@@ -50,6 +98,30 @@ router.get('/project/:uid', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /user/:
+ *   get:
+ *     tags:
+ *       - User
+ *     summary: Fetch all user data by uid
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: User ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/', async (req, res) => {
   try {
     const users = await User.find({})
