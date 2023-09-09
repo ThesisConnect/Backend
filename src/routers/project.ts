@@ -3,7 +3,7 @@ import Project from '../models/project'
 import { createSchema, editSchema } from '../schema/project'
 import Chat from '../models/chat'
 import Folder from '../models/folder'
-import { IUser } from "../models/user"
+import { IUser } from '../models/user'
 
 const router = express.Router()
 
@@ -38,7 +38,11 @@ router.get('/:id', async (req, res) => {
       return res.status(400).send('Bad request')
     }
 
-    const project = await Project.findById(id).populate<{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>("advisors co_advisors advisee")
+    const project = await Project.findById(id).populate<{
+      advisors: IUser[]
+      co_advisors: IUser[]
+      advisee: IUser[]
+    }>('advisors co_advisors advisee')
     if (project) {
       return res.status(200).send(project)
     }
@@ -80,7 +84,11 @@ router.get('/users/:id', async (req, res) => {
       return res.status(400).send('Bad request')
     }
 
-    const project = await Project.findById(req.params.id).populate<{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>("advisors co_advisors advisee")
+    const project = await Project.findById(req.params.id).populate<{
+      advisors: IUser[]
+      co_advisors: IUser[]
+      advisee: IUser[]
+    }>('advisors co_advisors advisee')
     if (project) {
       const data = {
         advisors: project.advisors,
@@ -163,8 +171,8 @@ router.post('/create', async (req, res) => {
       return res.status(500).send('Failed to create folder')
     }
 
-    let child : string[] = []
-    for (const folder_name of ["All task", "General", "Literature review"]) {
+    let child: string[] = []
+    for (const folder_name of ['All task', 'General', 'Literature review']) {
       const child_folder = await Folder.create({
         name: folder_name,
         shared: [
@@ -172,13 +180,13 @@ router.post('/create', async (req, res) => {
           ...createData.data.co_advisors,
           ...createData.data.advisee,
         ],
-        parent: root_folder
+        parent: root_folder,
       })
       root_folder.child.push(child_folder._id)
       if (!child_folder) {
         for (const child_id of child) {
           const folder = await Folder.findById(child_id)
-          await folder?.deleteOne();
+          await folder?.deleteOne()
         }
         return res.status(500).send('Failed to create folder')
       }
@@ -187,16 +195,14 @@ router.post('/create', async (req, res) => {
 
     for (let user_id of createData.data.advisee) {
       const child_folder = await Folder.create({
-        name: "Private",
-        shared: [
-          user_id
-        ],
-        parent: root_folder
+        name: 'Private',
+        shared: [user_id],
+        parent: root_folder,
       })
       if (!child_folder) {
         for (const child_id of child) {
           const folder = await Folder.findById(child_id)
-          await folder?.deleteOne();
+          await folder?.deleteOne()
         }
         return res.status(500).send('Internal server error')
       }
@@ -204,7 +210,7 @@ router.post('/create', async (req, res) => {
     }
 
     await root_folder.updateOne({
-      $addToSet: { child: child }
+      $addToSet: { child: child },
     })
 
     const result = await Project.create({
@@ -221,7 +227,7 @@ router.post('/create', async (req, res) => {
 
     await Chat.findByIdAndDelete(chat._id)
     const folder = await Folder.findById(root_folder._id)
-    await folder?.deleteOne();
+    await folder?.deleteOne()
 
     return res.status(500).send('Failed to create project')
   } catch (error) {

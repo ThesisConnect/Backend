@@ -38,12 +38,14 @@ router.get('/:id', async (req, res) => {
       return res.status(400).send('Bad request')
     }
 
-    const plan = await Plan.findById(id).populate<{ project_id: IProject}>('project_id')
+    const plan = await Plan.findById(id).populate<{ project_id: IProject }>(
+      'project_id',
+    )
     if (plan) {
       return res.status(200).send(plan)
     }
 
-    return res.status(404).send("Not found")
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -113,10 +115,7 @@ router.post('/create', async (req, res) => {
       }
 
       const parent = await Folder.findOne({
-        $and: [
-          {parent: project.folder_id},
-          {name: 'All task'}
-        ]
+        $and: [{ parent: project.folder_id }, { name: 'All task' }],
       })
 
       if (!parent) {
@@ -139,7 +138,7 @@ router.post('/create', async (req, res) => {
       }
 
       await parent.updateOne({
-        $addToSet: { child: folder._id }
+        $addToSet: { child: folder._id },
       })
     }
 
@@ -164,18 +163,15 @@ router.post('/create', async (req, res) => {
 
     if (folder) {
       const f = await Folder.findById(folder._id)
-      await f?.deleteOne();
+      await f?.deleteOne()
 
       const parent = await Folder.findOne({
-        $and: [
-          {parent: project.folder_id},
-          {name: 'All task'}
-        ]
+        $and: [{ parent: project.folder_id }, { name: 'All task' }],
       })
 
       if (parent) {
         await parent.updateOne({
-          $pull: { child: folder._id }
+          $pull: { child: folder._id },
         })
       }
     }
@@ -231,7 +227,7 @@ router.post('/create', async (req, res) => {
  */
 router.put('/edit', async (req, res) => {
   try {
-    const editData = editSchema.safeParse(req.body)    
+    const editData = editSchema.safeParse(req.body)
     if (!editData.success) {
       return res.status(400).send('Body not match(Zod)')
     }

@@ -95,26 +95,26 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>(
   { timestamps: true },
 )
 
-projectSchema.pre('deleteOne', {document: true}, async function(next) {
+projectSchema.pre('deleteOne', { document: true }, async function (next) {
   try {
     const rootFolder = await Folder.findById(this.folder_id)
     await rootFolder?.deleteOne()
 
-    const All_summary = await Summary.find({project_id: this._id})
+    const All_summary = await Summary.find({ project_id: this._id })
     for (let summary of All_summary) {
       await summary.deleteOne()
     }
 
-    const All_plan = await Plan.find({project_id: this._id})
+    const All_plan = await Plan.find({ project_id: this._id })
     for (let plan of All_plan) {
       await plan.deleteOne()
     }
 
     await Chat.findByIdAndDelete(this.chat_id)
     next()
-  } catch(err) {
+  } catch (err) {
     console.log(err)
   }
-});
+})
 
 export default model<IProjectDocument, IProjectModel>('Project', projectSchema)
