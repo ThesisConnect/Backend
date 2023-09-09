@@ -171,6 +171,7 @@ router.delete('/delete/:id', async (req, res) => {
     if (!id) {
       return res.status(400).send('Bad request')
     }
+
     const project = await Project.findById(id)
     const result = await project?.deleteOne()
     if (result) {
