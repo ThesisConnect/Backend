@@ -1,36 +1,94 @@
-import express from "express";
-import * as _ from "lodash";
-import Folder, { IFolder, IFolderDocument } from "../models/folder";
-import { addFileSchema, createSchema, editSchema } from "../schema/folder";
-import User, { IUser } from "../models/user";
-import File, { IFile } from "../models/file";
-import { uuidv4 } from "@firebase/util";
+import express from 'express'
+import Folder, { IFolder, IFolderDocument } from '../models/folder'
+import { addFileSchema, createSchema, editSchema } from '../schema/folder'
+import { IUser } from '../models/user'
+import { IFile } from '../models/file'
 
-const router = express.Router();
+const router = express.Router()
 
-router.get("/:id", async (req, res) => {
+/**
+ * @swagger
+ * /folder/{id}:
+ *   get:
+ *     tags:
+ *       - Folder
+ *     summary: Fetch data by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the folder
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:id', async (req, res) => {
   try {
-    const id = req.params?.id;
+    const id = req.params?.id
     if (!id) {
-      return res.status(400).send("Bad request");
+      return res.status(400).send('Bad request')
     }
 
-    const folder = await Folder.findById(id).populate<{ parent: IFolder, child: IFolder[], files: IFile[], shared: IUser[] }>("parent child files shared");
+    const folder = await Folder.findById(id).populate<{
+      parent: IFolder
+      child: IFolder[]
+      files: IFile[]
+      shared: IUser[]
+    }>('parent child files shared')
     if (folder) {
-      return res.status(200).send(folder);
+      return res.status(200).send(folder)
     }
 
-    return res.status(404).send("Not found");
+    return res.status(404).send('Not found')
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send(error)
   }
-});
+})
 
-router.post("/create", async (req, res) => {
+/**
+ * @swagger
+ * /folder/create:
+ *   post:
+ *     tags:
+ *       - Folder
+ *     summary: Create a new folder
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: New name of the file
+ *               parent:
+ *                 type: string
+ *                 description: ID of the parent folder
+ *             required: [name]
+ *     responses:
+ *       200:
+ *         description: Created
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/create', async (req, res) => {
   try {
-    const createData = createSchema.safeParse(req.body);
+    const createData = createSchema.safeParse(req.body)
     if (!createData.success) {
-      return res.status(400).send("Body not match");
+      return res.status(400).send('Body not match')
     }
 
     let parentFolder: IFolderDocument | null = null
@@ -38,92 +96,185 @@ router.post("/create", async (req, res) => {
     if (parent) {
       parentFolder = await Folder.findById(parent)
       if (!parentFolder) {
-        return res.status(404).send("Parent not found");
+        return res.status(404).send('Parent not found')
       }
     }
 
     const result = await Folder.create({
       name: createData.data.name,
       parent: createData.data.parent,
-    });
+    })
 
     if (result) {
       if (parentFolder) {
         await parentFolder.updateOne({
-          $addToSet: { child: result._id }
+          $addToSet: { child: result._id },
         })
       }
 
-      return res.status(200).send(result);
+      return res.status(200).send(result)
     }
 
     return res.status(500).send('Failed to create folder')
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send(error)
   }
-});
+})
 
-router.put("/edit", async (req, res) => {
+/**
+ * @swagger
+ * /folder/edit:
+ *   put:
+ *     tags:
+ *       - Folder
+ *     summary: Edit folder data
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: ID of the folder
+ *               name:
+ *                 type: string
+ *                 description: New name of the folder
+ *               shared:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: ID of the user
+ *             required: [id]
+ *     responses:
+ *       200:
+ *         description: Edited
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put('/edit', async (req, res) => {
   try {
-    const editData = editSchema.safeParse(req.body);
+    const editData = editSchema.safeParse(req.body)
     if (!editData.success) {
-      return res.status(400).send("Body not match");
+      return res.status(400).send('Body not match')
     }
 
     const result = await Folder.findByIdAndUpdate(editData.data.id, {
       name: editData.data.name,
-      shared: editData.data.shared
-    });
+      shared: editData.data.shared,
+    })
 
     if (result) {
-      return res.status(200).send(result);
+      return res.status(200).send(result)
     }
 
-    return res.status(404).send("Not found");
+    return res.status(404).send('Not found')
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send(error)
   }
-});
+})
 
-router.put("/addFile", async (req, res) => {
+/**
+ * @swagger
+ * /folder/addFile:
+ *   put:
+ *     tags:
+ *       - Folder
+ *     summary: Add file to folder
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: string
+ *                 description: ID of the folder
+ *               files:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   description: ID of the file
+ *             required: [id, files]
+ *     responses:
+ *       200:
+ *         description: Edited
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put('/addFile', async (req, res) => {
   try {
-    const addFileData = addFileSchema.safeParse(req.body);
+    const addFileData = addFileSchema.safeParse(req.body)
     if (!addFileData.success) {
-      return res.status(400).send("Body not match");
+      return res.status(400).send('Body not match')
     }
 
     const result = await Folder.findByIdAndUpdate(addFileData.data.id, {
-      $addToSet: { files: addFileData.data.files }
-    });
+      $addToSet: { files: addFileData.data.files },
+    })
 
     if (result) {
-      return res.status(200).send(result);
+      return res.status(200).send(result)
     }
 
-    return res.status(404).send("Not found");
+    return res.status(404).send('Not found')
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send(error)
   }
-});
+})
 
-router.delete("/delete/:id", async (req, res) => {
+/**
+ * @swagger
+ * /folder/delete/{id}:
+ *   delete:
+ *     tags:
+ *       - Folder
+ *     summary: Delete folder by id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the folder
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Deleted
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.delete('/delete/:id', async (req, res) => {
   try {
-    const id = req.params?.id;
+    const id = req.params?.id
     if (!id) {
-      return res.status(400).send("Bad request");
+      return res.status(400).send('Bad request')
     }
 
     const folder = await Folder.findById(id)
-    const result = await folder?.deleteOne();
+    const result = await folder?.deleteOne()
     console.log(result)
     if (result) {
-      return res.status(200).send(result);
+      return res.status(200).send(result)
     }
 
-    return res.status(404).send("Not found");
+    return res.status(404).send('Not found')
   } catch (error) {
-    return res.status(500).send(error);
+    return res.status(500).send(error)
   }
-});
+})
 
-export default router;
+export default router

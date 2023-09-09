@@ -81,7 +81,7 @@ const planSchema = new Schema<IPlanDocument, IPlanDocument>(
   { timestamps: true },
 )
 
-planSchema.pre("deleteOne", {document: true}, async function(next) {
+planSchema.pre('deleteOne', { document: true }, async function (next) {
   try {
     const chat = await Chat.findById(this.chat_id)
     if (chat) {
@@ -95,6 +95,6 @@ planSchema.pre("deleteOne", {document: true}, async function(next) {
   } catch (error) {
     console.log(error)
   }
-});
+})
 
 export default model<IPlanDocument, IPlanModel>('Plan', planSchema)

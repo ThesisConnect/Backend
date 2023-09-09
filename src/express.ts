@@ -8,6 +8,8 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import authRoute from './Authentication/authRoute'
 import jwtMiddleware from './middleware/jwtMiddleware'
+import swaggerJsdoc from 'swagger-jsdoc'
+import swaggerUi from 'swagger-ui-express'
 interface Error {
   status?: number
   message?: string
@@ -86,6 +88,28 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     .status(err.status ?? 500)
     .send(`<h1>${err.message ?? 'มีข้อผิดพลาดเกิดขึ้น'}</h1>`)
 })
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Express API with Swagger',
+      version: '1.0.0',
+      description:
+        'This is a simple CRUD API application made with Express and documented with Swagger',
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT}`,
+      },
+    ],
+  },
+  // Path to the API docs
+  apis: ['./src/routers/**/*.ts'], // Change this if your routes are in a different location
+}
+const specs = swaggerJsdoc(swaggerOptions)
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs))
+
 app.listen(PORT, () => {
   console.log(
     chalk.greenBright.bold(
@@ -95,10 +119,3 @@ app.listen(PORT, () => {
     ),
   )
 })
-// mongoose.connection.on('disconnected', () => {
-//     console.log('Mongoose default connection disconnected');
-// });
-
-// mongoose.connection.on('error', (err) => {
-//     console.error('Mongoose encountered an error:', err);
-// });
