@@ -6,15 +6,17 @@ import Project from '../models/project'
 const router = express.Router()
 router.get('/:uid', async (req, res) => {
   try {
-    if (req.params.uid) {
-      const user = await User.findById(req.params.uid)
-      if (!user) {
-        return res.status(404).send('User not found')
-      }
-      const sentData = { ...user.toObject(), found: true }
-      return res.status(200).send(_.omit(sentData, ['_id', '__v']))
+    const uid = req.params?.uid
+    if (!uid) {
+      return res.status(400).send('Bad request')
     }
-    return res.status(400).send('Bad request')
+
+    const user = await User.findById(uid)
+    if (user) {
+      return res.status(200).send(user)
+    }
+
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -22,9 +24,11 @@ router.get('/:uid', async (req, res) => {
 
 router.get('/project/:uid', async (req, res) => {
   try {
-    if (!req.params.uid){
+    const uid = req.params?.uid
+    if (!uid) {
       return res.status(400).send('Bad request')
-    } 
+    }
+
     const projects = await Project.find({
       $or: [
         { advisors: { $in: req.params.uid } },
@@ -32,14 +36,15 @@ router.get('/project/:uid', async (req, res) => {
         { advisee: { $in: req.params.uid } },
       ],
     })
-    if (!projects) {
-      return res.status(404).send('Project not found')
+
+    if (projects) {
+      const data = projects.map((project) => {
+        return project?._id
+      })
+      return res.status(200).send(data)
     }
-    const sentData = projects.map((project) => {
-      return project?._id
-    })
-    return res.status(200).send(sentData)
-    return res.status(400).send('Bad request')
+
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
