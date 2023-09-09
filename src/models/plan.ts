@@ -30,7 +30,7 @@ const planSchema = new Schema<IPlanDocument, IPlanDocument>(
   {
     _id: {
       type: String,
-      default: ()=>uuidv4(),
+      default: () => uuidv4(),
     },
     project_id: {
       type: String,

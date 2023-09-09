@@ -37,7 +37,7 @@ router.get('/project/:uid', async (req, res) => {
     }
   } catch (error) {
     return res.status(500).send(error)
-  }  
+  }
 })
 
 export default router

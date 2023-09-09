@@ -44,7 +44,7 @@ router.post('/create', async (req, res) => {
 })
 
 router.put('/edit', async (req, res) => {
-  try {    
+  try {
     const editData = editSchema.safeParse(req.body)
     if (!editData.success) {
       return res.status(400).send('Body not match')
@@ -59,11 +59,11 @@ router.put('/edit', async (req, res) => {
     return res.status(400).send('Bad request')
   } catch (error) {
     return res.status(500).send(error)
-  }  
+  }
 })
 
 router.delete('/delete/:id', async (req, res) => {
-  try {  
+  try {
     if (req.params.id) {
       const result = await File.findByIdAndDelete(req.params.id)
       if (!result) {

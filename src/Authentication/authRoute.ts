@@ -23,7 +23,7 @@ router.post('/update/profile', jwtMiddleware, updateProfile)
 router.post('/update/profileImage', jwtMiddleware, updateImageProfileUrl)
 router.delete(
   '/update/deleteProfileImage',
-  jwtMiddleware, 
+  jwtMiddleware,
   updateImageProfileUrl,
 )
 

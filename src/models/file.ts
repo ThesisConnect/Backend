@@ -14,7 +14,6 @@ export interface IFile {
   size: number
   fileType: string
   memo?: string
-
 }
 
 export interface IFileDocument extends IFile, Document, SchemaTimestampsConfig {
@@ -26,7 +25,7 @@ const fileSchema = new Schema<IFileDocument, IFileDocument>(
   {
     _id: {
       type: String,
-      default: ()=>uuidv4(),
+      default: () => uuidv4(),
     },
     name: {
       type: String,

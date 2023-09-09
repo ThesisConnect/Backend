@@ -34,7 +34,7 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>(
   {
     _id: {
       type: String,
-      default: ()=>uuidv4(),
+      default: () => uuidv4(),
     },
     name: {
       type: String,

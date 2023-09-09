@@ -12,8 +12,8 @@ export interface IFolder {
   _id: string
   name: string
   parent?: string
-  child: string[]| IFolderDocument[]
-  files: string[]| IFileDocument[]
+  child: string[] | IFolderDocument[]
+  files: string[] | IFileDocument[]
   shared: string[]
 }
 
@@ -26,7 +26,7 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
   {
     _id: {
       type: String,
-      default: ()=>uuidv4(),
+      default: () => uuidv4(),
     },
     name: {
       type: String,
@@ -37,17 +37,17 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
       default: null,
       required: true,
     },
-    child:[
+    child: [
       {
         type: String,
         ref: 'Folder',
-      }
-    ] ,
-    files:[
+      },
+    ],
+    files: [
       {
         type: String,
         ref: 'File',
-      }
+      },
     ],
     shared: {
       type: [String],

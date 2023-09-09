@@ -10,25 +10,28 @@ const router = express.Router()
 router.get('/data/:folderId', async (req, res) => {
   try {
     const folderID: string = req.params.folderId
-    const folder = await Folder.findById(folderID).populate<{files: IFile[], child: IFolder[]}>("files child")
+    const folder = await Folder.findById(folderID).populate<{
+      files: IFile[]
+      child: IFolder[]
+    }>('files child')
     if (folder) {
-      let {child, files} = folder
+      let { child, files } = folder
       child = child.map((child) => {
-        return{
+        return {
           ...child,
-          type: "folder"
+          type: 'folder',
         }
       })
       files = files.map((file) => {
-        return{
+        return {
           ...file,
-          type: "file"
+          type: 'file',
         }
       })
       return res.status(200).send([...child, ...files])
-  }
+    }
 
-    return res.status(400).send("Folder not found")
+    return res.status(400).send('Folder not found')
   } catch (err) {
     console.log(err)
     return res.status(400).send('Bad request')

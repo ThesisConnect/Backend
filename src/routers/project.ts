@@ -8,92 +8,112 @@ import Folder from '../models/folder'
 
 const router = express.Router()
 router.get('/data/:id', async (req, res) => {
-  if (req.params.id) {
-    const project = await Project.findById(req.params.id)
-    if (!project) {
-      res.status(200).send({ found: false })
-      return
+  try {
+    if (req.params.id) {
+      const project = await Project.findById(req.params.id)
+      if (!project) {
+        res.status(200).send({ found: false })
+        return
+      }
+      const sentData = { ...project.toObject(), found: true }
+      return res.status(200).send(_.omit(sentData, ['_id', '__v']))
     }
-    const sentData = { ...project.toObject(), found: true }
-    return res.status(200).send(_.omit(sentData, ['_id', '__v']))
+  } catch (error) {
+    return res.status(500).send(error)
   }
 })
 
 router.get('/users/:id', async (req, res) => {
-  if (req.params.id) {
-    const project = await Project.findById(req.params.id)
-    if (!project) {
-      res.status(200).send({ users: [] })
-      return
+  try {
+    if (req.params.id) {
+      const project = await Project.findById(req.params.id)
+      if (!project) {
+        res.status(200).send({ users: [] })
+        return
+      }
+      const sentData = {
+        advisors: project.advisors,
+        co_advisors: project.co_advisors,
+        advisee: project.advisee,
+      }
+      return res.status(200).send(sentData)
     }
-    const sentData = {
-      advisors: project.advisors,
-      co_advisors: project.co_advisors,
-      advisee: project.advisee,
-    }
-    return res.status(200).send(sentData)
+  } catch (error) {
+    return res.status(500).send(error)
   }
 })
 
 router.post('/create', async (req, res) => {
-  const createData = createSchema.safeParse(req.body)
-  if (!createData.success) {
-    return res.status(400).send('Body not match')
-  }
-  const chat = await Chat.create({})
-  if (!chat) {
-    return res.status(500).send('Internal server error')
-  }
-  const folder = await Folder.create({
-    name: createData.data.name,
-    shared: [
-      ...createData.data.advisors,
-      ...createData.data.co_advisors,
-      ...createData.data.advisee,
-    ],
-  })
-  if (!folder) {
-    return res.status(500).send('Internal server error')
-  }
-  const result = await Project.create({
-    name: createData.data.name,
-    advisors: createData.data.advisors,
-    co_advisors: createData.data.co_advisors,
-    advisee: createData.data.advisee,
-    chat_id: chat._id,
-    folder_id: folder._id,
-  })
-  if (result) {
-    return res.status(200).send(result)
-  } else {
-    return res.status(400).send('Bad request')
+  try {
+    const createData = createSchema.safeParse(req.body)
+    if (!createData.success) {
+      return res.status(400).send('Body not match')
+    }
+    const chat = await Chat.create({})
+    if (!chat) {
+      return res.status(500).send('Internal server error')
+    }
+    const folder = await Folder.create({
+      name: createData.data.name,
+      shared: [
+        ...createData.data.advisors,
+        ...createData.data.co_advisors,
+        ...createData.data.advisee,
+      ],
+    })
+    if (!folder) {
+      return res.status(500).send('Internal server error')
+    }
+    const result = await Project.create({
+      name: createData.data.name,
+      advisors: createData.data.advisors,
+      co_advisors: createData.data.co_advisors,
+      advisee: createData.data.advisee,
+      chat_id: chat._id,
+      folder_id: folder._id,
+    })
+    if (result) {
+      return res.status(200).send(result)
+    } else {
+      return res.status(400).send('Bad request')
+    }
+  } catch (error) {
+    return res.status(500).send(error)
   }
 })
 
 router.put('/edit', async (req, res) => {
-  const editData = editSchema.safeParse(req.body)
-  if (!editData.success) {
-    return res.status(400).send('Bad request')
-  }
-  const result = await Project.findByIdAndUpdate(editData.data.id, {
-    name: editData.data.name,
-    advisors: editData.data.advisors,
-    co_advisors: editData.data.co_advisors,
-    advisee: editData.data.advisee,
-  })
-  if (result) {
-    return res.status(200).send('OK')
-  } else {
-    return res.status(400).send('Bad request')
+  try {
+    const editData = editSchema.safeParse(req.body)
+    if (!editData.success) {
+      return res.status(400).send('Bad request')
+    }
+    const result = await Project.findByIdAndUpdate(editData.data.id, {
+      name: editData.data.name,
+      advisors: editData.data.advisors,
+      co_advisors: editData.data.co_advisors,
+      advisee: editData.data.advisee,
+    })
+    if (result) {
+      return res.status(200).send('OK')
+    } else {
+      return res.status(400).send('Bad request')
+    }
+  } catch (error) {
+    return res.status(500).send(error)
   }
 })
 
 router.delete('/delete/:id', async (req, res) => {
-  const result = await Project.findByIdAndDelete(req.params.id)
-  if (result) {
-    return res.status(200).send('OK')
-  } else {
-    return res.status(400).send('Bad request')
+  try {
+    const result = await Project.findByIdAndDelete(req.params.id)
+    if (result) {
+      return res.status(200).send('OK')
+    } else {
+      return res.status(400).send('Bad request')
+    }
+  } catch (error) {
+    return res.status(500).send(error)
   }
 })
 

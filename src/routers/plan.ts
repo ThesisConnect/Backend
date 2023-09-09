@@ -7,14 +7,18 @@ import Project from '../models/project'
 
 const router = express.Router()
 router.get('/data/:id', async (req, res) => {
-  if (req.params.id) {
-    const plan = await Plan.findById(req.params.id)
-    if (!plan) {
-      res.status(400).send({ found: false })
-      return
+  try {
+    if (req.params.id) {
+      const plan = await Plan.findById(req.params.id)
+      if (!plan) {
+        res.status(400).send({ found: false })
+        return
+      }
+      const sentData = { ...plan.toObject(), found: true }
+      return res.status(200).send(sentData)
     }
-    const sentData = { ...plan.toObject(), found: true }
-    return res.status(200).send(sentData)
+  } catch (error) {
+    return res.status(500).send(error)
   }
 })
 
@@ -37,7 +41,11 @@ router.post('/create', async (req, res) => {
       }
       folder = await Folder.create({
         name: createData.data.name,
-        shared: [...project.advisors, ...project.co_advisors, ...project.advisee],
+        shared: [
+          ...project.advisors,
+          ...project.co_advisors,
+          ...project.advisee,
+        ],
       })
       if (!folder) {
         return res.status(500).send('Internal server error')
@@ -64,34 +72,42 @@ router.post('/create', async (req, res) => {
 })
 
 router.put('/edit', async (req, res) => {
-  const editData = editSchema.safeParse(req.body)
-  if (!editData.success) {
-    return res.status(400).send('Body not match')
-  }
-  const result = await Plan.findByIdAndUpdate(editData.data.id, {
-    name: editData.data.name,
-    description: editData.data.description,
-    progress: editData.data.progress,
-    start_date: editData.data.start_date,
-    end_date: editData.data.end_date,
-  })
-  if (result) {
-    return res.status(200).send('OK')
-  } else {
-    return res.status(400).send('Data not found')
-  }
-})
-
-router.delete('/delete/:id', async (req, res) => {
-  if (req.params.id) {
-    const result = await Plan.findByIdAndDelete(req.params.id)
+  try {
+    const editData = editSchema.safeParse(req.body)
+    if (!editData.success) {
+      return res.status(400).send('Body not match')
+    }
+    const result = await Plan.findByIdAndUpdate(editData.data.id, {
+      name: editData.data.name,
+      description: editData.data.description,
+      progress: editData.data.progress,
+      start_date: editData.data.start_date,
+      end_date: editData.data.end_date,
+    })
     if (result) {
       return res.status(200).send('OK')
     } else {
       return res.status(400).send('Data not found')
     }
-  } else {
-    return res.status(400).send('Missing id')
+  } catch (error) {
+    return res.status(500).send(error)
+  }
+})
+
+router.delete('/delete/:id', async (req, res) => {
+  try {
+    if (req.params.id) {
+      const result = await Plan.findByIdAndDelete(req.params.id)
+      if (result) {
+        return res.status(200).send('OK')
+      } else {
+        return res.status(400).send('Data not found')
+      }
+    } else {
+      return res.status(400).send('Missing id')
+    }
+  } catch (error) {
+    return res.status(500).send(error)
   }
 })
 
