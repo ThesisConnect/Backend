@@ -115,6 +115,7 @@ router.delete("/delete/:id", async (req, res) => {
 
     const folder = await Folder.findById(id)
     const result = await folder?.deleteOne();
+    console.log(result)
     if (result) {
       return res.status(200).send(result);
     }

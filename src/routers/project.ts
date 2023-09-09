@@ -6,6 +6,8 @@ import { uuidv4 } from '@firebase/util'
 import Chat from '../models/chat'
 import Folder from '../models/folder'
 import User, { IUser } from "../models/user"
+import Summary from '../models/summary'
+import Plan from '../models/plan'
 
 const router = express.Router()
 router.get('/:id', async (req, res) => {
