@@ -7,15 +7,15 @@ const router = express.Router()
 
 router.get('/:id', async (req, res) => {
   try {
-    if (req.params.id) {
-      const file = await File.findById(req.params.id)
-      if (!file) {
-        res.status(400).send({ found: false })
-        return
-      }
-      const sentData = { ...file.toObject(), found: true }
-      return res.status(200).send(_.omit(sentData, ['_id', '__v']))
+    const id = req.params?.id;
+    if (!id) {
+      return res.status(400).send("Bad request");
     }
+    const file = await File.findById(id)
+    if (file) {
+      return res.status(200).send(file)
+    }
+    return res.status(404).send("Not found")
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -56,7 +56,7 @@ router.put('/edit', async (req, res) => {
     if (result) {
       return res.status(200).send(result)
     }
-    return res.status(400).send('Bad request')
+    return res.status(404).send("Not found");
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -64,13 +64,15 @@ router.put('/edit', async (req, res) => {
 
 router.delete('/delete/:id', async (req, res) => {
   try {
-    if (req.params.id) {
-      const result = await File.findByIdAndDelete(req.params.id)
-      if (!result) {
-        return res.status(200).send(result)
-      }
-      return res.status(400).send('Bad request')
+    const id = req.params?.id;
+    if (!id) {
+      return res.status(400).send("Bad request");
     }
+    const result = await File.findByIdAndDelete(id)
+    if (result) {
+      return res.status(200).send(result)
+    }
+    return res.status(404).send("Not found");
   } catch (error) {
     return res.status(500).send(error)
   }

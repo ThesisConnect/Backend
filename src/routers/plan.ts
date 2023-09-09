@@ -3,13 +3,13 @@ import Plan from '../models/plan'
 import { createSchema, editSchema } from '../schema/plan'
 import Chat, { IChat } from '../models/chat'
 import Folder, { IFolder } from '../models/folder'
-import Project from '../models/project'
+import Project, { IProject } from '../models/project'
 
 const router = express.Router()
 router.get('/:id', async (req, res) => {
   try {
     if (req.params.id) {
-      const plan = await Plan.findById(req.params.id)
+      const plan = await Plan.findById(req.params.id).populate<{ project_id: IProject}>('project_id')
       if (!plan) {
         res.status(400).send({ found: false })
         return

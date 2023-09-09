@@ -5,18 +5,18 @@ import { createSchema, editSchema } from '../schema/project'
 import { uuidv4 } from '@firebase/util'
 import Chat from '../models/chat'
 import Folder from '../models/folder'
+import User, { IUser } from "../models/user"
 
 const router = express.Router()
 router.get('/:id', async (req, res) => {
   try {
     if (req.params.id) {
-      const project = await Project.findById(req.params.id)
+      const project = await Project.findById(req.params.id).populate<{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>("advisors co_advisors advisee")
       if (!project) {
         res.status(200).send({ found: false })
         return
       }
-      const sentData = { ...project.toObject(), found: true }
-      return res.status(200).send(_.omit(sentData, ['_id', '__v']))
+      return res.status(200).send(project)
     }
   } catch (error) {
     return res.status(500).send(error)
@@ -26,7 +26,7 @@ router.get('/:id', async (req, res) => {
 router.get('/users/:id', async (req, res) => {
   try {
     if (req.params.id) {
-      const project = await Project.findById(req.params.id)
+      const project = await Project.findById(req.params.id).populate<{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>("advisors co_advisors advisee")
       if (!project) {
         res.status(200).send({ users: [] })
         return
@@ -53,7 +53,7 @@ router.post('/create', async (req, res) => {
     if (!chat) {
       return res.status(500).send('Internal server error')
     }
-    const folder = await Folder.create({
+    const root_folder = await Folder.create({
       name: createData.data.name,
       shared: [
         ...createData.data.advisors,
@@ -61,16 +61,46 @@ router.post('/create', async (req, res) => {
         ...createData.data.advisee,
       ],
     })
-    if (!folder) {
+    if (!root_folder) {
       return res.status(500).send('Internal server error')
     }
+
+    const child_name: string[] = ["All task", "General", "Literature review"]
+    for (let folder_name of child_name) {
+      const child_folder = await Folder.create({
+        name: folder_name,
+        shared: [
+          ...createData.data.advisors,
+          ...createData.data.co_advisors,
+          ...createData.data.advisee,
+        ],
+        parent: root_folder
+      })
+      if (!child_folder) {
+        return res.status(500).send('Internal server error')
+      }
+    }
+
+    for (let user_id of createData.data.advisee) {
+      const child_folder = await Folder.create({
+        name: "Private",
+        shared: [
+          user_id
+        ],
+        parent: root_folder
+      })
+      if (!child_folder) {
+        return res.status(500).send('Internal server error')
+      }
+    }
+
     const result = await Project.create({
       name: createData.data.name,
       advisors: createData.data.advisors,
       co_advisors: createData.data.co_advisors,
       advisee: createData.data.advisee,
       chat_id: chat._id,
-      folder_id: folder._id,
+      folder_id: root_folder._id,
     })
     if (result) {
       return res.status(200).send(result)
@@ -115,6 +145,7 @@ router.delete('/delete/:id', async (req, res) => {
   } catch (error) {
     return res.status(500).send(error)
   }
+  
 })
 
 export default router

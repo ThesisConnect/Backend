@@ -6,6 +6,9 @@ import {
   SchemaTimestampsConfig,
 } from 'mongoose'
 import { uuidv4 } from '@firebase/util'
+import Project from '../models/project'
+import Chat from '../models/chat'
+import Folder from '../models/folder'
 
 export interface IStatus {
   id: number
@@ -90,5 +93,16 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>(
   },
   { timestamps: true },
 )
+
+projectSchema.pre('deleteOne', {document: true}, async function(next) {
+  try {
+    await Chat.findByIdAndDelete(this.chat_id)
+    await Folder.findByIdAndDelete(this.folder_id)
+  } catch(err) {
+    console.log(err)
+  }
+
+});
+
 
 export default model<IProjectDocument, IProjectModel>('Project', projectSchema)

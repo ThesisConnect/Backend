@@ -6,6 +6,9 @@ import {
   SchemaTimestampsConfig,
 } from 'mongoose'
 import { uuidv4 } from '@firebase/util'
+import Project from '../models/project'
+import Chat from '../models/chat'
+import Folder from '../models/folder'
 
 export interface IFolder {
   _id: string
@@ -54,5 +57,10 @@ const folderSchema = new Schema<IFolderDocument, IFolderDocument>(
   },
   { timestamps: true },
 )
+
+folderSchema.pre('deleteOne', {document: true}, async function(next) {
+  console.log(this)
+  next()
+});
 
 export default model<IFolderDocument, IFolderModel>('Folder', folderSchema)

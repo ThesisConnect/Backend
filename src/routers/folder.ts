@@ -1,7 +1,7 @@
 import express from "express";
 import * as _ from "lodash";
 import Folder, { IFolder } from "../models/folder";
-import { createSchema, editSchema } from "../schema/folder";
+import { addFileSchema, createSchema, editSchema } from "../schema/folder";
 import User, { IUser } from "../models/user";
 import File, { IFile } from "../models/file";
 import { uuidv4 } from "@firebase/util";
@@ -10,14 +10,15 @@ const router = express.Router();
 
 router.get("/:id", async (req, res) => {
   try {
-    if (req.params.id) {
-      const folder = await Folder.findById(req.params.id).populate<{ parent: IFolder, child: IFolder[], files: IFile[], shared: IUser[] }>("parent child files shared");
-      if (!folder) {
-        res.status(400).send({ found: false });
-        return;
-      }
+    const id = req.params?.id;
+    if (!id) {
+      return res.status(400).send("Bad request");
+    }
+    const folder = await Folder.findById(id).populate<{ parent: IFolder, child: IFolder[], files: IFile[], shared: IUser[] }>("parent child files shared");
+    if (folder) {
       return res.status(200).send(folder);
     }
+    return res.status(404).send("Not found");
   } catch (error) {
     return res.status(500).send(error);
   }
@@ -31,7 +32,6 @@ router.post("/create", async (req, res) => {
     }
     const result = await Folder.create({
       name: createData.data.name,
-      shared: [uuidv4()]
     });
     if (result) {
       return res.status(200).send(result);
@@ -55,7 +55,25 @@ router.put("/edit", async (req, res) => {
     if (result) {
       return res.status(200).send(result);
     }
-    return res.status(400).send("Bad request");
+    return res.status(404).send("Not found");
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+});
+
+router.put("/addFile", async (req, res) => {
+  try {
+    const addFileData = addFileSchema.safeParse(req.body);
+    if (!addFileData.success) {
+      return res.status(400).send("Body not match");
+    }
+    const result = await Folder.findByIdAndUpdate(addFileData.data.id, {
+      $addToSet: { files: addFileData.data.files }
+    });
+    if (result) {
+      return res.status(200).send(result);
+    }
+    return res.status(404).send("Not found");
   } catch (error) {
     return res.status(500).send(error);
   }
@@ -63,14 +81,16 @@ router.put("/edit", async (req, res) => {
 
 router.delete("/delete/:id", async (req, res) => {
   try {
-    if (req.params.id) {
-      const folder = await Folder.findById(req.params.id)
-      const result = await folder?.deleteOne();
-      if (result) {
-        return res.status(200).send(result);
-      }
+    const id = req.params?.id;
+    if (!id) {
       return res.status(400).send("Bad request");
     }
+    const folder = await Folder.findById(id)
+    const result = await folder?.deleteOne();
+    if (result) {
+      return res.status(200).send(result);
+    }
+    return res.status(404).send("Not found");
   } catch (error) {
     return res.status(500).send(error);
   }
