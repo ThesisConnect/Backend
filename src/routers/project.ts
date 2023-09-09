@@ -10,14 +10,17 @@ import User, { IUser } from "../models/user"
 const router = express.Router()
 router.get('/:id', async (req, res) => {
   try {
-    if (req.params.id) {
-      const project = await Project.findById(req.params.id).populate<{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>("advisors co_advisors advisee")
-      if (!project) {
-        res.status(200).send({ found: false })
-        return
-      }
+    const id = req.params?.id
+    if (!id) {
+      return res.status(400).send('Bad request')
+    }
+
+    const project = await Project.findById(id).populate<{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>("advisors co_advisors advisee")
+    if (project) {
       return res.status(200).send(project)
     }
+
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -25,19 +28,22 @@ router.get('/:id', async (req, res) => {
 
 router.get('/users/:id', async (req, res) => {
   try {
-    if (req.params.id) {
-      const project = await Project.findById(req.params.id).populate<{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>("advisors co_advisors advisee")
-      if (!project) {
-        res.status(200).send({ users: [] })
-        return
-      }
-      const sentData = {
+    const id = req.params?.id
+    if (!id) {
+      return res.status(400).send('Bad request')
+    }
+
+    const project = await Project.findById(req.params.id).populate<{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>("advisors co_advisors advisee")
+    if (project) {
+      const data = {
         advisors: project.advisors,
         co_advisors: project.co_advisors,
         advisee: project.advisee,
       }
-      return res.status(200).send(sentData)
+      return res.status(200).send(data)
     }
+
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -49,10 +55,12 @@ router.post('/create', async (req, res) => {
     if (!createData.success) {
       return res.status(400).send('Body not match')
     }
+
     const chat = await Chat.create({})
     if (!chat) {
-      return res.status(500).send('Internal server error')
+      return res.status(500).send('Failed to create chat')
     }
+
     const root_folder = await Folder.create({
       name: createData.data.name,
       shared: [
@@ -62,11 +70,11 @@ router.post('/create', async (req, res) => {
       ],
     })
     if (!root_folder) {
-      return res.status(500).send('Internal server error')
+      return res.status(500).send('Failed to create folder')
     }
 
-    const child_name: string[] = ["All task", "General", "Literature review"]
-    for (let folder_name of child_name) {
+    let child : string[] = []
+    for (const folder_name of ["All task", "General", "Literature review"]) {
       const child_folder = await Folder.create({
         name: folder_name,
         shared: [
@@ -77,8 +85,13 @@ router.post('/create', async (req, res) => {
         parent: root_folder
       })
       if (!child_folder) {
-        return res.status(500).send('Internal server error')
+        for (const child_id of child) {
+          const folder = await Folder.findById(child_id)
+          await folder?.deleteOne();
+        }
+        return res.status(500).send('Failed to create folder')
       }
+      child.push(child_folder._id)
     }
 
     for (let user_id of createData.data.advisee) {
@@ -90,9 +103,18 @@ router.post('/create', async (req, res) => {
         parent: root_folder
       })
       if (!child_folder) {
+        for (const child_id of child) {
+          const folder = await Folder.findById(child_id)
+          await folder?.deleteOne();
+        }
         return res.status(500).send('Internal server error')
       }
+      child.push(child_folder._id)
     }
+
+    await root_folder.updateOne({
+      $addToSet: { child: child }
+    })
 
     const result = await Project.create({
       name: createData.data.name,
@@ -104,9 +126,13 @@ router.post('/create', async (req, res) => {
     })
     if (result) {
       return res.status(200).send(result)
-    } else {
-      return res.status(400).send('Bad request')
     }
+
+    await Chat.findByIdAndDelete(chat._id)
+    const folder = await Folder.findById(root_folder._id)
+    await folder?.deleteOne();
+
+    return res.status(500).send('Failed to create project')
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -118,17 +144,19 @@ router.put('/edit', async (req, res) => {
     if (!editData.success) {
       return res.status(400).send('Bad request')
     }
+
     const result = await Project.findByIdAndUpdate(editData.data.id, {
       name: editData.data.name,
       advisors: editData.data.advisors,
       co_advisors: editData.data.co_advisors,
       advisee: editData.data.advisee,
     })
+
     if (result) {
-      return res.status(200).send('OK')
-    } else {
-      return res.status(400).send('Bad request')
+      return res.status(200).send(result)
     }
+
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -136,36 +164,20 @@ router.put('/edit', async (req, res) => {
 
 router.delete('/delete/:id', async (req, res) => {
   try {
-    const result = await Project.findByIdAndDelete(req.params.id)
-    if (result) {
-      return res.status(200).send('OK')
-    } else {
+    const id = req.params?.id
+    if (!id) {
       return res.status(400).send('Bad request')
     }
+
+    const result = await Project.findByIdAndDelete(id)
+    if (result) {
+      return res.status(200).send(result)
+    }
+
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
-  
 })
 
 export default router
-
-/*
-Test case
-GET: http://localhost:8080/project/data/55e99b38-b79e-4f18-803b-91329049188f
-CREATE: http://localhost:8080/project/create
-{
-  "name": "Princess Elle",
-  "advisors": ["a", "b"],
-  "co_advisors": ["a", "b"],
-  "advisee": ["a", "b"]
-}
-EDIT: http://localhost:8080/project/edit
-{
-  "_id": "80eb258d-2db8-4694-b0b5-08590767727b",
-  "advisors": ["c"],
-  "co_advisors": ["a", "b"],
-  "advisee": ["a", "b"]
-}
-DELETE: http://localhost:8080/project/delete/
-*/

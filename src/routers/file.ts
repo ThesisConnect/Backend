@@ -11,10 +11,12 @@ router.get('/:id', async (req, res) => {
     if (!id) {
       return res.status(400).send("Bad request");
     }
+
     const file = await File.findById(id)
     if (file) {
       return res.status(200).send(file)
     }
+
     return res.status(404).send("Not found")
   } catch (error) {
     return res.status(500).send(error)
@@ -27,6 +29,7 @@ router.post('/create', async (req, res) => {
     if (!createData.success) {
       return res.status(400).send('Body not match')
     }
+
     const result = await File.create({
       name: createData.data.name,
       url: createData.data.url,
@@ -34,9 +37,11 @@ router.post('/create', async (req, res) => {
       type: createData.data.type,
       memo: createData.data.memo,
     })
+
     if (result) {
       return res.status(200).send(result)
     }
+
     return res.status(500).send('Failed to create file')
   } catch (error) {
     return res.status(500).send(error)
@@ -49,13 +54,16 @@ router.put('/edit', async (req, res) => {
     if (!editData.success) {
       return res.status(400).send('Body not match')
     }
+
     const result = await File.findByIdAndUpdate(editData.data.id, {
       name: editData.data.name,
       memo: editData.data.memo,
     })
+
     if (result) {
       return res.status(200).send(result)
     }
+
     return res.status(404).send("Not found");
   } catch (error) {
     return res.status(500).send(error)
@@ -68,10 +76,12 @@ router.delete('/delete/:id', async (req, res) => {
     if (!id) {
       return res.status(400).send("Bad request");
     }
+
     const result = await File.findByIdAndDelete(id)
     if (result) {
       return res.status(200).send(result)
     }
+
     return res.status(404).send("Not found");
   } catch (error) {
     return res.status(500).send(error)
