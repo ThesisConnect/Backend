@@ -7,15 +7,15 @@ const router = express.Router()
 
 router.get('/:id', async (req, res) => {
   try {
-    if (req.params.id) {
-      const summary = await Summary.findById(req.params.id)
-      if (!summary) {
-        res.status(400).send({ found: false })
-        return
-      }
-      const sentData = { ...summary.toObject(), found: true }
-      return res.status(200).send(_.omit(sentData, ['_id', '__v']))
+    if (!req.params.id) {
+      return res.status(400).send('Bad request')
     }
+    const summary = await Summary.findById(req.params.id)
+    if (!summary) {
+      return res.status(404).send('Summary not found')
+    }
+    const sentData = { ...summary.toObject(), found: true }
+    return res.status(200).send(_.omit(sentData, ['_id', '__v']))
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -39,9 +39,8 @@ router.post('/create', async (req, res) => {
     })
     if (result) {
       return res.status(200).send(result)
-    } else {
-      return res.status(400).send('Bad request')
     }
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
