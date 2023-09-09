@@ -19,7 +19,7 @@ export interface IFolder {
   shared: string[]
 }
 
-interface IFolderDocument extends IFolder, Document, SchemaTimestampsConfig {
+export interface IFolderDocument extends IFolder, Document, SchemaTimestampsConfig {
   _id: string
 }
 

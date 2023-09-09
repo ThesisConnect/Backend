@@ -37,7 +37,7 @@ router.post('/create', async (req, res) => {
     if (result) {
       return res.status(200).send(result)
     }
-    return res.status(400).send('Bad request')
+    return res.status(500).send('Failed to create file')
   } catch (error) {
     return res.status(500).send(error)
   }

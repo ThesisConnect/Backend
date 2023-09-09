@@ -8,15 +8,15 @@ import Project, { IProject } from '../models/project'
 const router = express.Router()
 router.get('/:id', async (req, res) => {
   try {
-    if (req.params.id) {
-      const plan = await Plan.findById(req.params.id).populate<{ project_id: IProject}>('project_id')
-      if (!plan) {
-        res.status(400).send({ found: false })
-        return
-      }
-      const sentData = { ...plan.toObject(), found: true }
-      return res.status(200).send(sentData)
+    const id = req.params?.id
+    if (!id) {
+      return res.status(400).send('Bad request')
     }
+    const plan = await Plan.findById(id).populate<{ project_id: IProject}>('project_id')
+    if (plan) {
+      return res.status(200).send(plan)
+    }
+    return res.status(404).send("Not found")
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -30,14 +30,14 @@ router.post('/create', async (req, res) => {
     }
     const project = await Project.findById(createData.data.project_id)
     if (!project) {
-      return res.status(400).send('Project not found')
+      return res.status(404).send('Project not found')
     }
     let chat: IChat | null = null
     let folder: IFolder | null = null
     if (req.body.task) {
       chat = await Chat.create({})
       if (!chat) {
-        return res.status(500).send('Internal server error')
+        return res.status(500).send('Failed to create chat')
       }
       folder = await Folder.create({
         name: createData.data.name,
@@ -48,7 +48,7 @@ router.post('/create', async (req, res) => {
         ],
       })
       if (!folder) {
-        return res.status(500).send('Internal server error')
+        return res.status(500).send('Failed to create folder')
       }
     }
     const result = await Plan.create({
@@ -63,9 +63,8 @@ router.post('/create', async (req, res) => {
     })
     if (result) {
       return res.status(200).send(result)
-    } else {
-      return res.status(400).send('Create failed')
     }
+    return res.status(500).send('Failed to create plan')
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -85,10 +84,9 @@ router.put('/edit', async (req, res) => {
       end_date: editData.data.end_date,
     })
     if (result) {
-      return res.status(200).send('OK')
-    } else {
-      return res.status(400).send('Data not found')
+      return res.status(200).send(result)
     }
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
@@ -96,42 +94,18 @@ router.put('/edit', async (req, res) => {
 
 router.delete('/delete/:id', async (req, res) => {
   try {
-    if (req.params.id) {
-      const result = await Plan.findByIdAndDelete(req.params.id)
-      if (result) {
-        return res.status(200).send('OK')
-      } else {
-        return res.status(400).send('Data not found')
-      }
-    } else {
-      return res.status(400).send('Missing id')
+    const id = req.params?.id
+    if (!id) {
+      return res.status(400).send('Bad request')
     }
+    const result = await Plan.findByIdAndDelete(id)
+    if (result) {
+      return res.status(200).send(result)
+    }
+    return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
   }
 })
 
 export default router
-
-/*
-Test case
-GET: http://localhost:8080/plan/data/aef27580-b6c8-4697-ba10-995f2e85e7d3
-CREATE: http://localhost:8080/plan/create
-{
-  "project_id": "55e99b38-b79e-4f18-803b-91329049188f",
-  "name": "Princess Elle",
-  "description": "Kai maidee AMD",
-  "start_date": "09/09/2023",
-  "end_date": "12/09/2023",
-  "task": false
-}
-EDIT: http://localhost:8080/plan/edit
-{
-  "_id": "53384bb5-ea62-45f5-90c4-a2aa28e5839a",
-  "progress": 99,
-  "start_date": "09/09/2023",
-  "end_date": "12/09/2023",
-  "task": false
-}
-DELETE: http://localhost:8080/plan/delete/
-*/
