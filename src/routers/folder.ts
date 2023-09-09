@@ -1,6 +1,6 @@
 import express from "express";
 import * as _ from "lodash";
-import Folder, { IFolder } from "../models/folder";
+import Folder, { IFolder, IFolderDocument } from "../models/folder";
 import { addFileSchema, createSchema, editSchema } from "../schema/folder";
 import User, { IUser } from "../models/user";
 import File, { IFile } from "../models/file";
@@ -30,13 +30,27 @@ router.post("/create", async (req, res) => {
     if (!createData.success) {
       return res.status(400).send("Body not match");
     }
+    let parentFolder: IFolderDocument | null = null
+    const parent = createData.data.parent
+    if (parent) {
+      parentFolder = await Folder.findById(parent)
+      if (!parentFolder) {
+        return res.status(404).send("Parent not found");
+      }
+    }
     const result = await Folder.create({
       name: createData.data.name,
+      parent: createData.data.parent,
     });
     if (result) {
+      if (parentFolder) {
+        await parentFolder.updateOne({
+          $addToSet: { child: result._id }
+        })
+      }
       return res.status(200).send(result);
     }
-    return res.status(400).send("Bad request");
+    return res.status(500).send('Failed to create folder')
   } catch (error) {
     return res.status(500).send(error);
   }
