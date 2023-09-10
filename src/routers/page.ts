@@ -1,10 +1,10 @@
 import express from 'express'
 import Project from '../models/project'
-import {IUser} from '../models/user'
+import { IUser } from '../models/user'
 import Summary from '../models/summary'
-import Plan, {IPlan} from '../models/plan'
+import Plan, { IPlan } from '../models/plan'
 import folder from '../models/folder'
-import {IFile} from '../models/file'
+import { IFile } from '../models/file'
 
 const router = express.Router()
 
@@ -38,7 +38,9 @@ router.get('/main', async (req, res) => {
         { co_advisors: { $in: uid } },
         { advisee: { $in: uid } },
       ],
-    }).populate <{ advisors: IUser[], co_advisors: IUser[], advisee: IUser[]}>('advisors co_advisors advisee')
+    }).populate<{ advisors: IUser[]; co_advisors: IUser[]; advisee: IUser[] }>(
+      'advisors co_advisors advisee',
+    )
 
     return res.status(200).send(projects)
   } catch (error) {
@@ -77,8 +79,12 @@ router.get('/summary/:id', async (req, res) => {
       return res.status(400).send('Bad request')
     }
 
-    const summaries = await Summary.find({project_id: id})
-    //.populate<{ sender_id: IUser, reciever_id: IUser, plan_id: IPlan, file_id: IFile}>('sender_id reciever_id plan_id file_id')
+    const summaries = await Summary.find({ project_id: id }).populate<{
+      sender_id: IUser
+      reciever_id: IUser
+      plan_id: IPlan
+      file_id: IFile
+    }>('sender_id reciever_id plan_id file_id')
 
     return res.status(200).send(summaries)
   } catch (error) {
@@ -200,11 +206,11 @@ router.get('/file/:id', async (req, res) => {
       return res.status(400).send('Bad request')
     }
 
-    const folders = await folder.find({
-      $and: [
-        {shared: { $in: req.params.id } },
-        {parent: null },]
-    }).populate<{ shared: IUser[]}>('shared')
+    const folders = await folder
+      .find({
+        $and: [{ shared: { $in: req.params.id } }, { parent: null }],
+      })
+      .populate<{ shared: IUser[] }>('shared')
 
     return res.status(200).send(folders)
   } catch (error) {
