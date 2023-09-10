@@ -48,6 +48,7 @@
     "react-dom": "^18.2.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
+    "ts-luxon": "^4.4.0",
     "zod": "^3.22.2"
   }
 }

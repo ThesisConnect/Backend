@@ -77,7 +77,8 @@ router.get('/summary/:id', async (req, res) => {
       return res.status(400).send('Bad request')
     }
 
-    const summaries = await Summary.find({project_id: id}).populate<{ sender_id: IUser, reciever_id: IUser, plan_id: IPlan, file_id: IFile}>('sender_id reciever_id plan_id file_id')
+    const summaries = await Summary.find({project_id: id})
+    //.populate<{ sender_id: IUser, reciever_id: IUser, plan_id: IPlan, file_id: IFile}>('sender_id reciever_id plan_id file_id')
 
     return res.status(200).send(summaries)
   } catch (error) {
