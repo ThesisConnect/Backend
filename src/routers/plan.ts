@@ -4,6 +4,7 @@ import { createSchema, editSchema } from '../schema/plan'
 import Chat, { IChat } from '../models/chat'
 import Folder, { IFolder } from '../models/folder'
 import Project, { IProject } from '../models/project'
+import { DateTime } from 'luxon'
 
 const router = express.Router()
 
@@ -141,13 +142,16 @@ router.post('/create', async (req, res) => {
         $addToSet: { child: folder._id },
       })
     }
-
+    const reformatDate = {
+      endDate: DateTime.fromFormat(createData.data.end_date, 'D').toISO(),
+      startDate: DateTime.fromFormat(createData.data.start_date, 'D').toISO(),
+    }
     const result = await Plan.create({
       project_id: createData.data.project_id,
       name: createData.data.name,
       description: createData.data.description,
-      start_date: createData.data.start_date,
-      end_date: createData.data.end_date,
+      start_date: reformatDate.startDate,
+      end_date: reformatDate.endDate,
       task: createData.data.task,
       chat_id: req.body.task ? chat?._id : null,
       folder_id: req.body.task ? folder?._id : null,
