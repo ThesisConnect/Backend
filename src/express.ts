@@ -102,6 +102,9 @@ const swaggerOptions = {
       {
         url: `http://localhost:${PORT}`,
       },
+      {
+        url: `https://localhost:${PORT}`,
+      },
     ],
   },
   // Path to the API docs
