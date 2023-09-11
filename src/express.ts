@@ -103,7 +103,7 @@ const swaggerOptions = {
         url: `http://localhost:${PORT}`,
       },
       {
-        url: `https://localhost:${PORT}`,
+        url: `https://backend-production-a1af.up.railway.app/`,
       },
     ],
   },
