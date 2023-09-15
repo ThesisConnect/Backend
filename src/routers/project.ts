@@ -3,7 +3,8 @@ import Project from '../models/project'
 import { createSchema, editSchema } from '../schema/project'
 import Chat from '../models/chat'
 import Folder from '../models/folder'
-import { IUser } from '../models/user'
+import user, { IUser } from '../models/user'
+import firebaseAdmin from '../Authentication/FirebaseAdmin/admin'
 
 const router = express.Router()
 
@@ -125,17 +126,17 @@ router.get('/users/:id', async (req, res) => {
  *                 type: array
  *                 items:
  *                   type: string
- *                   description: ID of the user
+ *                   description: email of the user
  *               co_advisors:
  *                 type: array
  *                 items:
  *                   type: string
- *                   description: ID of the user
+ *                   description: email of the user
  *               advisee:
  *                 type: array
  *                 items:
  *                   type: string
- *                   description: ID of the user
+ *                   description: email of the user
  *             required: [name, advisors, co_advisors, advisee]
  *     responses:
  *       200:
@@ -154,6 +155,43 @@ router.post('/create', async (req, res) => {
       return res.status(400).send('Body not match')
     }
 
+    let cache: Map<string, any> = new Map()
+    const getUIDs = async function (emails: string[]) {
+      return (
+        await Promise.all(
+          emails.map(async (email) => {
+            try {
+              const u = await firebaseAdmin.auth().getUserByEmail(email)
+              if (!u) {
+                return
+              }
+
+              const us = await user.findById(u.uid)
+              if (!us) {
+                return
+              }
+
+              cache.set(us._id, {
+                ...us.toObject(),
+                email: u.email,
+              })
+              return us._id
+            } catch (error) {
+              return
+            }
+          }),
+        )
+      ).filter((id) => id !== undefined)
+    }
+
+    const advisors = await getUIDs(createData.data.advisors)
+    if (advisors.length == 0) {
+      return res.status(404).send('Invalid advisors')
+    }
+
+    const co_advisors = await getUIDs(createData.data.co_advisors)
+    const advisee = await getUIDs(createData.data.advisee)
+
     const chat = await Chat.create({})
     if (!chat) {
       return res.status(500).send('Failed to create chat')
@@ -161,11 +199,7 @@ router.post('/create', async (req, res) => {
 
     const root_folder = await Folder.create({
       name: createData.data.name,
-      shared: [
-        ...createData.data.advisors,
-        ...createData.data.co_advisors,
-        ...createData.data.advisee,
-      ],
+      shared: [...advisors, ...co_advisors, ...advisee],
     })
     if (!root_folder) {
       return res.status(500).send('Failed to create folder')
@@ -175,11 +209,7 @@ router.post('/create', async (req, res) => {
     for (const folder_name of ['All task', 'General', 'Literature review']) {
       const child_folder = await Folder.create({
         name: folder_name,
-        shared: [
-          ...createData.data.advisors,
-          ...createData.data.co_advisors,
-          ...createData.data.advisee,
-        ],
+        shared: [...advisors, ...co_advisors, ...advisee],
         parent: root_folder,
       })
       root_folder.child.push(child_folder._id)
@@ -215,14 +245,20 @@ router.post('/create', async (req, res) => {
 
     const result = await Project.create({
       name: createData.data.name,
-      advisors: createData.data.advisors,
-      co_advisors: createData.data.co_advisors,
-      advisee: createData.data.advisee,
+      advisors: advisors,
+      co_advisors: co_advisors,
+      advisee: advisee,
       chat_id: chat._id,
       folder_id: root_folder._id,
     })
     if (result) {
-      return res.status(200).send(result)
+      const data = {
+        ...result.toObject(),
+        advisors: result.advisors.map((id) => cache.get(id)),
+        co_advisors: result.co_advisors.map((id) => cache.get(id)),
+        advisee: result.advisee.map((id) => cache.get(id)),
+      }
+      return res.status(200).send(data)
     }
 
     await Chat.findByIdAndDelete(chat._id)
