@@ -13,7 +13,7 @@ const router = express.Router()
  * /page/main:
  *   get:
  *     tags:
- *       - page
+ *       - Page
  *     summary: Fetch main page data
  *     responses:
  *       200:
@@ -53,7 +53,7 @@ router.get('/main', async (req, res) => {
  * /page/summary/{id}:
  *   get:
  *     tags:
- *       - page
+ *       - Page
  *     summary: Fetch summary page data
  *     parameters:
  *       - name: id
@@ -78,9 +78,8 @@ router.get('/summary/:id', async (req, res) => {
     if (!id) {
       return res.status(400).send('Bad request')
     }
-    
-    const summaries = await Summary.find({ project_id: id })
-    .populate<{
+
+    const summaries = await Summary.find({ project_id: id }).populate<{
       sender_id: IUser
       reciever_id: IUser
       plan_id: IPlan
@@ -98,7 +97,7 @@ router.get('/summary/:id', async (req, res) => {
  * /page/plan/{id}:
  *   get:
  *     tags:
- *       - page
+ *       - Page
  *     summary: Fetch plan page data
  *     parameters:
  *       - name: id
@@ -139,7 +138,7 @@ router.get('/plan/:id', async (req, res) => {
  * /page/gantt/{id}:
  *   get:
  *     tags:
- *       - page
+ *       - Page
  *     summary: Fetch gantt page data
  *     parameters:
  *       - name: id
@@ -181,7 +180,7 @@ router.get('/gantt/:id', async (req, res) => {
  * /page/file/{id}:
  *   get:
  *     tags:
- *       - page
+ *       - Page
  *     summary: Fetch file page data
  *     parameters:
  *       - name: id
