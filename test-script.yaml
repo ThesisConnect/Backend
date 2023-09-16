@@ -1,0 +1,21 @@
+config:
+  target: 'http://127.0.0.1:8080'
+  phases:
+    - duration: 60
+      arrivalRate: 20
+    - duration: 120
+      arrivalRate: 50
+    - duration: 120
+      arrivalRate: 100
+    - duration: 60
+      arrivalRate: 50
+    - duration: 60
+      arrivalRate: 20
+  ensure:
+    p99: 300
+    maxErrorRate: 1
+
+scenarios:
+  - flow:
+      - get:
+          url: '/auth/checkAuth'

@@ -5,6 +5,7 @@ import Summary from '../models/summary'
 import Plan, { IPlan } from '../models/plan'
 import folder from '../models/folder'
 import { IFile } from '../models/file'
+import firebaseAdmin from '../Authentication/FirebaseAdmin/admin'
 
 const router = express.Router()
 
@@ -32,7 +33,7 @@ router.get('/main', async (req, res) => {
       return res.status(400).send('Bad request')
     }
 
-    const projects = await Project.find({
+    let projects = await Project.find({
       $or: [
         { advisors: { $in: uid } },
         { co_advisors: { $in: uid } },
@@ -41,7 +42,23 @@ router.get('/main', async (req, res) => {
     }).populate<{ advisors: IUser[]; co_advisors: IUser[]; advisee: IUser[] }>(
       'advisors co_advisors advisee',
     )
+    projects = await Promise.all(projects.map(async (project) => {
+      const getFirebaseUser = async (user:any) => {
+        try {
+          const firebaseUser = await firebaseAdmin.auth().getUser(user._id);
+          user._doc.email = firebaseUser.email;
+        } catch (error) {
+          console.log("fail")
+          console.error('Error fetching Firebase user:', error);
+        }
+      };
 
+       const allUsers = [...project.advisors, ...project.co_advisors, ...project.advisee];
+      await Promise.all(allUsers.map(getFirebaseUser));
+      // console.log(project.advisors)
+      return project;
+    }));
+   
     return res.status(200).send(projects)
   } catch (error) {
     return res.status(500).send(error)
