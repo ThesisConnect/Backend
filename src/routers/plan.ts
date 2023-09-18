@@ -151,7 +151,7 @@ router.post('/create', async (req, res) => {
       name: createData.data.name,
       description: createData.data.description,
       start_date: createData.data.start_date,
-      end_date: createData.data.start_date,
+      end_date: createData.data.end_date,
       task: createData.data.task,
       chat_id: req.body.task ? chat?._id : null,
       folder_id: req.body.task ? folder?._id : null,
