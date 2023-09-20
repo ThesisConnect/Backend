@@ -23,6 +23,7 @@ const register = async (req: Request, res: Response) => {
         ...options,
         secure: true,
         sameSite: 'none',
+        domain: '.railway.app',
       }
     }
     res.cookie('session', sessionCookie, {})
