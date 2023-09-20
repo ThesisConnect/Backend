@@ -14,6 +14,7 @@ const logout = (req: Request, res: Response) => {
       ...options,
       secure: true,
       sameSite: 'none',
+      domain: 'railway.app',
     }
   }
   // console.log("logout  route")
