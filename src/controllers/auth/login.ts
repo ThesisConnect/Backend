@@ -24,7 +24,7 @@ const login = async (req: Request, res: Response) => {
         ...options,
         secure: true,
         sameSite: 'none',
-        domain: '.railway.app',
+        domain: 'railway.app',
       }
     }
     res.cookie('session', sessionCookie, options)
