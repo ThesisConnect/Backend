@@ -26,7 +26,7 @@ const register = async (req: Request, res: Response) => {
         domain: 'railway.app',
       }
     }
-    res.cookie('session', sessionCookie, {})
+    res.cookie('session', sessionCookie, options)
     const decodedIdToken = await firebaseAdmin.auth().verifyIdToken(idToken)
     const { uid, email } = decodedIdToken
     const user = await User.findById(uid)
