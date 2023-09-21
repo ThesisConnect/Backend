@@ -138,13 +138,11 @@ router.post('/create', async (req, res) => {
         return res.status(500).send('Failed to create folder')
       }
 
+      chat.folder_id = folder._id
+      
       await parent.updateOne({
         $addToSet: { child: folder._id },
       })
-    }
-    const reformatDate = {
-      endDate: DateTime.fromFormat(createData.data.end_date, 'D').toISO(),
-      startDate: DateTime.fromFormat(createData.data.start_date, 'D').toISO(),
     }
     const result = await Plan.create({
       project_id: createData.data.project_id,
@@ -160,6 +158,7 @@ router.post('/create', async (req, res) => {
     if (result) {
       return res.status(200).send(result)
     }
+
 
     if (chat) {
       await Chat.findByIdAndDelete(chat._id)

@@ -212,6 +212,9 @@ router.post('/create', async (req, res) => {
         shared: [...advisors, ...co_advisors, ...advisee],
         parent: root_folder,
       })
+      if (child_folder.name == 'General') {
+        chat.folder_id = child_folder._id
+      }
       root_folder.child.push(child_folder._id)
       if (!child_folder) {
         for (const child_id of child) {
