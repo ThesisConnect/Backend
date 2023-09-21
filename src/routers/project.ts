@@ -192,11 +192,6 @@ router.post('/create', async (req, res) => {
     const co_advisors = await getUIDs(createData.data.co_advisors)
     const advisee = await getUIDs(createData.data.advisee)
 
-    const chat = await Chat.create({})
-    if (!chat) {
-      return res.status(500).send('Failed to create chat')
-    }
-
     const root_folder = await Folder.create({
       name: createData.data.name,
       shared: [...advisors, ...co_advisors, ...advisee],
@@ -212,10 +207,6 @@ router.post('/create', async (req, res) => {
         shared: [...advisors, ...co_advisors, ...advisee],
         parent: root_folder,
       })
-      if (child_folder.name == 'General') {
-        chat.folder_id = child_folder._id
-      }
-      root_folder.child.push(child_folder._id)
       if (!child_folder) {
         for (const child_id of child) {
           const folder = await Folder.findById(child_id)
@@ -242,7 +233,18 @@ router.post('/create', async (req, res) => {
       child.push(child_folder._id)
     }
 
-    await chat.save()
+    const chat = await Chat.create({
+      folder_id: root_folder._id,
+    })
+    if (!chat) {
+      child.push(root_folder._id)
+      for (const child_id of child) {
+        const folder = await Folder.findById(child_id)
+        await folder?.deleteOne()
+      }
+      return res.status(500).send('Failed to create chat')
+    }
+
     await root_folder.updateOne({
       $addToSet: { child: child },
     })

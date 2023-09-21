@@ -1,7 +1,7 @@
 import express from 'express'
 import Plan from '../models/plan'
 import { createSchema, editSchema } from '../schema/plan'
-import Chat, {IChat, IChatDocument} from '../models/chat'
+import Chat, {IChat} from '../models/chat'
 import Folder, { IFolder } from '../models/folder'
 import Project, { IProject } from '../models/project'
 import { DateTime } from 'luxon'
@@ -107,20 +107,14 @@ router.post('/create', async (req, res) => {
       return res.status(404).send('Project not found')
     }
 
-    let chat: IChatDocument | null = null
+    let chat: IChat | null = null
     let folder: IFolder | null = null
     if (req.body.task) {
-      chat = await Chat.create({})
-      if (!chat) {
-        return res.status(500).send('Failed to create chat')
-      }
-
       const parent = await Folder.findOne({
         $and: [{ parent: project.folder_id }, { name: 'All task' }],
       })
 
       if (!parent) {
-        await Chat.findByIdAndDelete(chat._id)
         return res.status(404).send('Parent not found')
       }
 
@@ -138,8 +132,15 @@ router.post('/create', async (req, res) => {
         return res.status(500).send('Failed to create folder')
       }
 
-      chat.folder_id = folder._id
-      await chat.save()
+      chat = await Chat.create({
+        folder_id: folder._id
+      })
+      if (!chat) {
+        const f = await Folder.findById(folder._id)
+        await f?.deleteOne()
+        return res.status(500).send('Failed to create chat')
+      }
+
       await parent.updateOne({
         $addToSet: { child: folder._id },
       })
@@ -158,7 +159,6 @@ router.post('/create', async (req, res) => {
     if (result) {
       return res.status(200).send(result)
     }
-
 
     if (chat) {
       await Chat.findByIdAndDelete(chat._id)
