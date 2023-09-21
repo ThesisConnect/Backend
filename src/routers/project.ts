@@ -242,6 +242,7 @@ router.post('/create', async (req, res) => {
       child.push(child_folder._id)
     }
 
+    await chat.save()
     await root_folder.updateOne({
       $addToSet: { child: child },
     })

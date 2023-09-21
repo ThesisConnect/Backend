@@ -14,7 +14,7 @@ export interface IChat {
   messages: string[]
 }
 
-interface IChatDocument extends IChat, Document, SchemaTimestampsConfig {
+export interface IChatDocument extends IChat, Document, SchemaTimestampsConfig {
   _id: string
 }
 
