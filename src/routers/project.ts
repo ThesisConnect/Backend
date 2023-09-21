@@ -200,6 +200,7 @@ router.post('/create', async (req, res) => {
       return res.status(500).send('Failed to create folder')
     }
 
+    let general_folder = ""
     let child: string[] = []
     for (const folder_name of ['All task', 'General', 'Literature review']) {
       const child_folder = await Folder.create({
@@ -213,6 +214,9 @@ router.post('/create', async (req, res) => {
           await folder?.deleteOne()
         }
         return res.status(500).send('Failed to create folder')
+      }
+      if (folder_name == 'General') {
+        general_folder = child_folder._id
       }
       child.push(child_folder._id)
     }
@@ -233,8 +237,16 @@ router.post('/create', async (req, res) => {
       child.push(child_folder._id)
     }
 
+    if (general_folder == "") {
+        for (const child_id of child) {
+            const folder = await Folder.findById(child_id)
+            await folder?.deleteOne()
+        }
+        return res.status(500).send('Internal server error')
+    }
+
     const chat = await Chat.create({
-      folder_id: root_folder._id,
+      folder_id: general_folder,
     })
     if (!chat) {
       child.push(root_folder._id)
