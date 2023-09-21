@@ -110,7 +110,10 @@ projectSchema.pre('deleteOne', { document: true }, async function (next) {
       await plan.deleteOne()
     }
 
-    await Chat.findByIdAndDelete(this.chat_id)
+    const chat = await Chat.findById(this.chat_id)
+    if (chat) {
+      await chat.deleteOne()
+    }
     next()
   } catch (err) {
     console.log(err)
