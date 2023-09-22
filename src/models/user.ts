@@ -15,7 +15,7 @@ export interface IUser {
   role: 'advisor' | 'advisee'
 }
 
-interface IUserDocument extends IUser, Document, SchemaTimestampsConfig {
+export interface IUserDocument extends IUser, Document, SchemaTimestampsConfig {
   _id: string
 }
 

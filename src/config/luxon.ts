@@ -1,2 +1,2 @@
-import { Settings } from 'luxon';
-Settings.defaultZone = 'Asia/Bangkok';
+import { Settings } from 'luxon'
+Settings.defaultZone = 'Asia/Bangkok'

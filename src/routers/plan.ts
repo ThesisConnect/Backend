@@ -1,7 +1,7 @@
 import express from 'express'
 import Plan from '../models/plan'
 import { createSchema, editSchema } from '../schema/plan'
-import Chat, {IChat} from '../models/chat'
+import Chat, { IChat } from '../models/chat'
 import Folder, { IFolder } from '../models/folder'
 import Project, { IProject } from '../models/project'
 import { DateTime } from 'luxon'
@@ -133,7 +133,7 @@ router.post('/create', async (req, res) => {
       }
 
       chat = await Chat.create({
-        folder_id: folder._id
+        folder_id: folder._id,
       })
       if (!chat) {
         const f = await Folder.findById(folder._id)
