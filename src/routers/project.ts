@@ -337,22 +337,66 @@ router.post('/create', async (req, res) => {
  */
 router.put('/edit', async (req, res) => {
   try {
+    let cache: Map<string, any> = new Map()
+    const getUIDs = async function (emails: string[]) {
+      return (
+        await Promise.all(
+          emails.map(async (email) => {
+            try {
+              const u = await firebaseAdmin.auth().getUserByEmail(email)
+              if (!u) {
+                return
+              }
+
+              const us = await user.findById(u.uid)
+              if (!us) {
+                return
+              }
+
+              cache.set(us._id, {
+                ...us.toObject(),
+                email: u.email,
+              })
+              return us._id
+            } catch (error) {
+              return
+            }
+          }),
+        )
+      ).filter((id) => id !== undefined)
+    }
+
     const editData = editSchema.safeParse(req.body)
     if (!editData.success) {
-      return res.status(400).send('Bad request')
+      return res.status(400).send('Schema not match')
     }
+
+    const advisors = await getUIDs(editData.data.advisors)
+    if (advisors.length == 0) {
+      return res.status(404).send('Invalid advisors')
+    }
+
+    const co_advisors = await getUIDs(editData.data.co_advisors)
+    const advisee = await getUIDs(editData.data.advisee)
 
     const result = await Project.findByIdAndUpdate(editData.data.id, {
       name: editData.data.name,
-      advisors: editData.data.advisors,
-      co_advisors: editData.data.co_advisors,
-      advisee: editData.data.advisee,
+      progress: editData.data.progress,
+      status: editData.data.status,
+      advisors: advisors,
+      co_advisors: co_advisors,
+      advisee: advisee,
     })
-
+    
     if (result) {
-      return res.status(200).send(result)
+      const data = {
+        ...result.toObject(),
+        advisors: result.advisors.map((id) => cache.get(id)),
+        co_advisors: result.co_advisors.map((id) => cache.get(id)),
+        advisee: result.advisee.map((id) => cache.get(id)),
+      }
+      return res.status(200).send(data)
     }
-
     return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
