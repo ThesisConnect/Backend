@@ -234,7 +234,7 @@ router.get('/gantt/:id', async (req, res) => {
  *       - name: id
  *         in: path
  *         required: true
- *         description: ID of the user
+ *         description: ID of the folder
  *         schema:
  *           type: string
  *     responses:
@@ -248,46 +248,6 @@ router.get('/gantt/:id', async (req, res) => {
  *         description: Internal server error
  */
 
-
-// router.get('/file/:id', async (req, res) => {
-//   try {
-//     const id = req.params?.id
-//     if (!id) {
-//       return res.status(400).send('Bad request')
-//     }
-
-//     const folders = await folder
-//       .find({
-//         $and: [{ shared: { $in: req.params.id } }, { parent: null }],
-//       })
-//       .populate<{ shared: IUser[] }>('shared')
-    
-//     return res.status(200).send(folders)
-//   } catch (error) {
-//     return res.status(500).send(error)
-//   }
-// })
-
-// export interface Fileitem {
-//   type: 'file';
-//   name: string;
-//   fileID: string;
-//   size: number;
-//   type_file: string;
-//   lastModified: string;
-//   link: string;
-//   memo?: string;
-// }
-
-// export interface Folder {
-//   type: 'folder';
-//   name: string;
-//   folderID: string;
-//   last_modifiled?: string;
-//   parentID?: string;
-//   children?: string[]; //only ID need
-//   share?: string[]; //only ID need
-// }
 
 router.get('/file/:id', async (req, res) => {
   try {
@@ -329,5 +289,24 @@ router.get('/file/:id', async (req, res) => {
     return res.status(500).send(error)
   }
 })
+
+// router.get('/file/:id', async (req, res) => {
+//   try {
+//     const id = req.params?.id
+//     if (!id) {
+//       return res.status(400).send('Bad request')
+//     }
+
+//     const folders = await folder
+//       .find({
+//         $and: [{ shared: { $in: req.params.id } }, { parent: null }],
+//       })
+//       .populate<{ shared: IUser[] }>('shared')
+    
+//     return res.status(200).send(folders)
+//   } catch (error) {
+//     return res.status(500).send(error)
+//   }
+// })
 
 export default router
