@@ -2,6 +2,7 @@ import express from 'express'
 import File from '../models/file'
 import { createSchema, editSchema } from '../schema/file'
 import Folder from '../models/folder'
+import file from '../models/file'
 
 const router = express.Router()
 
@@ -97,29 +98,30 @@ router.post('/create', async (req, res) => {
       return res.status(400).send('Body not match')
     }
 
-    const result = await File.create({
-      name: createData.data.name,
-      url: createData.data.url,
-      size: createData.data.size,
-      file_type: createData.data.file_type,
-      memo: createData.data.memo,
-    })
-
-    if (result) {
-      const folder_id = createData.data.folder_id
-      if (folder_id) {
-        const folder = await Folder.findById(folder_id)
-        if (folder) {
-          await folder.updateOne({
-            $addToSet: { files: result._id },
-          })
-        }
+    const files_data = createData.data.map(file => {
+      return {
+        _id: file.id,
+        name: file.name,
+        url: file.url,
+        size: file.size,
+        file_type: file.file_type,
+        memo: file.memo,
       }
-
-      return res.status(200).send(result)
+    })
+    const folder_id = createData.data[0].folder_id
+    try {
+        await file.insertMany(files_data, { ordered: false }) 
     }
-
-    return res.status(500).send('Failed to create file')
+    catch {}
+    if (folder_id) {
+      const folder = await Folder.findById(folder_id)
+      if (folder) {
+        await folder.updateOne({
+          $addToSet: { files: files_data.map(file => file._id) },
+        })
+      }
+    }
+    return res.status(200).send("OK")
   } catch (error) {
     return res.status(500).send(error)
   }
