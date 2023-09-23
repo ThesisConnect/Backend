@@ -1,14 +1,16 @@
 import { z } from 'zod'
 
-export const createSchema = z.array(z.object({
-  id: z.string(),
-  name: z.string(),
-  url: z.string(),
-  size: z.number(),
-  file_type: z.string(),
+export const createSchema = z.object({
   folder_id: z.string(),
-  memo: z.string().optional(),
-}))
+  files: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    url: z.string(),
+    size: z.number(),
+    file_type: z.string(),
+    memo: z.string().optional(),
+  })),
+})
 
 export const editSchema = z.object({
   id: z.string(),

@@ -98,7 +98,7 @@ router.post('/create', async (req, res) => {
       return res.status(400).send('Body not match')
     }
 
-    const files_data = createData.data.map(file => {
+    const files_data = createData.data.files.map(file => {
       return {
         _id: file.id,
         name: file.name,
@@ -108,7 +108,7 @@ router.post('/create', async (req, res) => {
         memo: file.memo,
       }
     })
-    const folder_id = createData.data[0].folder_id
+    const folder_id = createData.data.folder_id
     try {
         await file.insertMany(files_data, { ordered: false }) 
     }
