@@ -6,7 +6,7 @@ export const createSchema = z.object({
   reciever_id: z.string(),
   sender_id: z.string(),
   comment: z.string(),
-  file_id: z.array(z.string()),
+  files: z.array(z.string()),
   chat_id: z.string(),
   progress: z.number(),
 })
