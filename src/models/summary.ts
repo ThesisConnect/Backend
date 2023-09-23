@@ -16,6 +16,7 @@ export interface ISummary {
   sender_id: string
   comment: string
   progress: number
+  status: 'pending' | 'approved' | 'rejected' | 'completed'
   files: string[]
   chat_id: string
 }
@@ -57,6 +58,10 @@ const summarySchema = new Schema<ISummaryDocument, ISummaryDocument>(
     },
     progress: {
       type: Number,
+      required: true,
+    },
+    status: {
+      type: String,
       required: true,
     },
     files: {

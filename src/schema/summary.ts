@@ -8,6 +8,7 @@ export const createSchema = z.object({
   comment: z.string(),
   files: z.array(z.string()),
   chat_id: z.string(),
+  status: z.string(),
   progress: z.number(),
 })
 

@@ -83,10 +83,14 @@ router.get('/:id', async (req, res) => {
  *               chat_id:
  *                 type: string
  *                 description: ID of the chat
+ *               status:
+ *                 type: string
+ *                 description: Status of the plan
+ *                 enum: [pending, approved, rejected, completed]
  *               progress:
  *                 type: number
  *                 description: Progress of the plan
- *             required: [project_id, plan_id, reciever_id, sender_id, comment, file_id, chat_id, progress]
+ *             required: [project_id, plan_id, reciever_id, sender_id, comment, file_id, chat_id, status, progress]
  *     responses:
  *       200:
  *         description: Created
@@ -112,6 +116,7 @@ router.post('/create', async (req, res) => {
       comment: createData.data.comment,
       files: createData.data.files,
       chat_id: createData.data.chat_id,
+      status: createData.data.status,
       progress: createData.data.progress,
     })
 
