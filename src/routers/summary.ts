@@ -110,7 +110,7 @@ router.post('/create', async (req, res) => {
       reciever_id: createData.data.reciever_id,
       sender_id: createData.data.sender_id,
       comment: createData.data.comment,
-      file_id: createData.data.file_id,
+      files: createData.data.files,
       chat_id: createData.data.chat_id,
       progress: createData.data.progress,
     })
