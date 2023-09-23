@@ -131,7 +131,7 @@ router.get('/summary/:id', async (req, res) => {
       sender_id: IUser
       reciever_id: IUser
       plan_id: IPlan
-      files: IFile
+      files: IFile[]
     }>('sender_id reciever_id plan_id files')
 
     return res.status(200).send(summaries)
