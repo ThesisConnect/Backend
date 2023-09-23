@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const createSchema = z.object({
   folder_id: z.string(),
   files: z.array(z.object({
-    id: z.string(),
+    _id: z.string(),
     name: z.string(),
     url: z.string(),
     size: z.number(),
@@ -13,7 +13,7 @@ export const createSchema = z.object({
 })
 
 export const editSchema = z.object({
-  id: z.string(),
+  _id: z.string(),
   name: z.string().optional(),
   memo: z.string().optional(),
 })

@@ -100,7 +100,7 @@ router.post('/create', async (req, res) => {
 
     const files_data = createData.data.files.map(file => {
       return {
-        _id: file.id,
+        _id: file._id,
         name: file.name,
         url: file.url,
         size: file.size,
@@ -168,7 +168,7 @@ router.put('/edit', async (req, res) => {
       return res.status(400).send('Body not match')
     }
 
-    const result = await File.findByIdAndUpdate(editData.data.id, {
+    const result = await File.findByIdAndUpdate(editData.data._id, {
       name: editData.data.name,
       memo: editData.data.memo,
     })
