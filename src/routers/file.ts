@@ -1,8 +1,9 @@
 import express from 'express'
 import File from '../models/file'
+import file from '../models/file'
 import { createSchema, editSchema } from '../schema/file'
 import Folder from '../models/folder'
-import file from '../models/file'
+import Message from '../models/message'
 
 const router = express.Router()
 
@@ -40,6 +41,66 @@ router.get('/:id', async (req, res) => {
     const file = await File.findById(id)
     if (file) {
       return res.status(200).send(file)
+    }
+
+    return res.status(404).send('Not found')
+  } catch (error) {
+    return res.status(500).send(error)
+  }
+})
+
+/**
+ * @swagger
+ * /file/chat/{id}:
+ *   get:
+ *     tags:
+ *       - File
+ *     summary: Fetch data by chat's id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: ID of the chat
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Data
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/chat/:id', async (req, res) => {
+  try {
+    const id = req.params?.id
+    if (!id) {
+      return res.status(400).send('Bad request')
+    }
+
+    const files = await Message.find({ chat_id: id, type: 'file' })
+    if (files) {
+      return res.status(200).send(
+        await Promise.all(
+          files.map(async (data) => {
+            const file = await File.findById(data.content)
+            if (file) {
+              return {
+                type: 'file',
+                name: file.name,
+                _id: file._id,
+                size: file.size,
+                file_type: file.file_type,
+                lastModified: file.updatedAt?.toString() || '',
+                link: file.url,
+                memo: file.memo,
+              }
+            }
+          }),
+        ),
+      )
     }
 
     return res.status(404).send('Not found')
@@ -98,7 +159,7 @@ router.post('/create', async (req, res) => {
       return res.status(400).send('Body not match')
     }
 
-    const files_data = createData.data.files.map(file => {
+    const files_data = createData.data.files.map((file) => {
       return {
         _id: file._id,
         name: file.name,
@@ -110,18 +171,17 @@ router.post('/create', async (req, res) => {
     })
     const folder_id = createData.data.folder_id
     try {
-        await file.insertMany(files_data, { ordered: false }) 
-    }
-    catch {}
+      await file.insertMany(files_data, { ordered: false })
+    } catch {}
     if (folder_id) {
       const folder = await Folder.findById(folder_id)
       if (folder) {
         await folder.updateOne({
-          $addToSet: { files: files_data.map(file => file._id) },
+          $addToSet: { files: files_data.map((file) => file._id) },
         })
       }
     }
-    return res.status(200).send("OK")
+    return res.status(200).send('OK')
   } catch (error) {
     return res.status(500).send(error)
   }
