@@ -97,31 +97,6 @@ router.get('/chat/:id', async (req, res) => {
         }
       }))
     }
-    // const files = await Message.find({ chat_id: id, type: 'file' })
-    // if (files) {
-    //   return res.status(200).send(
-    //     await Promise.all(
-    //       files.map(async (data) => {
-    //         console.log(data.content)
-    //         const file = await File.findById(data.content)
-    //         console.log(file)
-    //         if (file) {
-    //           return {
-    //             type: 'file',
-    //             name: file.name,
-    //             _id: file._id,
-    //             size: file.size,
-    //             file_type: file.file_type,
-    //             lastModified: new Date(file.updatedAt?.toString() || ''),
-    //             link: file.url,
-    //             memo: file.memo,
-    //           }
-    //         }
-    //       }),
-    //     ),
-    //   )
-    // }
-
     return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
