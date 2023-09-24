@@ -12,4 +12,11 @@ export const createSchema = z.object({
   progress: z.number(),
 })
 
+export const editSchema = z.object({
+  id: z.string(),
+  comment: z.string().optional(),
+  status: z.string(),
+  progress: z.number(),
+})
+
 export type createSchema = z.infer<typeof createSchema>

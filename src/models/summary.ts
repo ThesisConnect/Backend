@@ -16,7 +16,7 @@ export interface ISummary {
   sender_id: string
   comment: string
   progress: number
-  status: 'pending' | 'approved' | 'rejected' | 'completed'
+  status: 'pending' | 'pendingwithreject' | 'approved' | 'rejected' | 'completed'
   files: string[]
   chat_id: string
 }
