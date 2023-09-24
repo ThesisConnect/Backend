@@ -44,36 +44,46 @@ router.put('/move', async (req, res) => {
     const moveData = moveSchema.safeParse(req.body)
     if (!moveData.success) {
       return res.status(400).send('Body not match')
-    } 
+    }
 
-    if(moveData.data.source_type === 'file'){
-      const result_1 = await Folder.findByIdAndUpdate(moveData.data.old_parent, {
-        $pull: { files: moveData.data.source }
-      })
-      const result_2 = await Folder.findByIdAndUpdate(moveData.data.destination, {
-        $addToSet: { files: moveData.data.source }
-      })
+    if (moveData.data.source_type === 'file') {
+      const result_1 = await Folder.findByIdAndUpdate(
+        moveData.data.old_parent,
+        {
+          $pull: { files: moveData.data.source },
+        },
+      )
+      const result_2 = await Folder.findByIdAndUpdate(
+        moveData.data.destination,
+        {
+          $addToSet: { files: moveData.data.source },
+        },
+      )
       if (result_1 && result_2) {
         return res.status(200).send('OK')
       }
       return res.status(404).send('Not found')
-    }
-    else if(moveData.data.source_type === 'folder'){
+    } else if (moveData.data.source_type === 'folder') {
       const result_1 = await Folder.findByIdAndUpdate(moveData.data.source, {
-        parent: moveData.data.destination
+        parent: moveData.data.destination,
       })
-      const result_2 = await Folder.findByIdAndUpdate(moveData.data.old_parent, {
-        $pull: { child: moveData.data.source }
-      })
-      const result_3 = await Folder.findByIdAndUpdate(moveData.data.destination, {
-        $addToSet: { child: moveData.data.source }
-      })
+      const result_2 = await Folder.findByIdAndUpdate(
+        moveData.data.old_parent,
+        {
+          $pull: { child: moveData.data.source },
+        },
+      )
+      const result_3 = await Folder.findByIdAndUpdate(
+        moveData.data.destination,
+        {
+          $addToSet: { child: moveData.data.source },
+        },
+      )
       if (result_1 && result_2 && result_3) {
         return res.status(200).send('OK')
       }
       return res.status(404).send('Not found')
-    }
-    else {
+    } else {
       return res.status(400).send('Bad request')
     }
   } catch (error) {

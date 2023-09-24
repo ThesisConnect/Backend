@@ -10,27 +10,27 @@ import firebaseAdmin from '../Authentication/FirebaseAdmin/admin'
 const router = express.Router()
 
 interface Fileitem {
-  type: 'file';
-  name: string;
-  fileID: string;
-  size: number;
-  file_type: string;
-  lastModified: string;
-  link: string;
-  memo?: string;
+  type: 'file'
+  name: string
+  fileID: string
+  size: number
+  file_type: string
+  lastModified: string
+  link: string
+  memo?: string
 }
 
 interface Folder {
-  type: 'folder';
-  name: string;
-  folderID: string;
-  last_modifiled?: string;
-  parentID?: string;
-  children?: string[]; //only ID need
-  share?: string[]; //only ID need
+  type: 'folder'
+  name: string
+  folderID: string
+  last_modifiled?: string
+  parentID?: string
+  children?: string[] //only ID need
+  share?: string[] //only ID need
 }
 
-type Item = Folder | Fileitem;
+type Item = Folder | Fileitem
 
 /**
  * @swagger
@@ -248,7 +248,6 @@ router.get('/gantt/:id', async (req, res) => {
  *         description: Internal server error
  */
 
-
 router.get('/file/:id', async (req, res) => {
   try {
     const id = req.params?.id
@@ -258,32 +257,37 @@ router.get('/file/:id', async (req, res) => {
 
     let files_id: string[] = []
 
-    const folders: Folder[] = (await folder.find({"_id": id})).map((folder) => {
+    const folders: Folder[] = (await folder.find({ _id: id })).map((folder) => {
       files_id = files_id.concat(folder.files)
       return {
-          type: 'folder',
-          name: folder.name,
-          folderID: folder._id,
-          last_modifiled: (typeof folder.updatedAt == "string") ? folder.updatedAt : undefined,
-          parentID: folder.parent,
-          children: folder.child,
-          share: folder.shared,
-      }})
+        type: 'folder',
+        name: folder.name,
+        folderID: folder._id,
+        last_modifiled:
+          typeof folder.updatedAt == 'string' ? folder.updatedAt : undefined,
+        parentID: folder.parent,
+        children: folder.child,
+        share: folder.shared,
+      }
+    })
 
-    const files : Fileitem[] = (await file.find({"_id": {"$in": files_id}})).map((file) => {
-      return {
-        type: 'file',
-        name: file.name,
-        fileID: file._id,
-        size: file.size,
-        file_type: file.file_type,
-        lastModified: (typeof file.updatedAt == "string") ? file.updatedAt : "",
-        link: file.url,
-        memo: file.memo,
-    }})
+    const files: Fileitem[] = (await file.find({ _id: { $in: files_id } })).map(
+      (file) => {
+        return {
+          type: 'file',
+          name: file.name,
+          fileID: file._id,
+          size: file.size,
+          file_type: file.file_type,
+          lastModified: typeof file.updatedAt == 'string' ? file.updatedAt : '',
+          link: file.url,
+          memo: file.memo,
+        }
+      },
+    )
 
     const items: Item[] = [...folders, ...files]
-    
+
     return res.status(200).send(items)
   } catch (error) {
     return res.status(500).send(error)
@@ -302,7 +306,7 @@ router.get('/file/:id', async (req, res) => {
 //         $and: [{ shared: { $in: req.params.id } }, { parent: null }],
 //       })
 //       .populate<{ shared: IUser[] }>('shared')
-    
+
 //     return res.status(200).send(folders)
 //   } catch (error) {
 //     return res.status(500).send(error)

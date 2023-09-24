@@ -6,8 +6,8 @@ import {
   SchemaTimestampsConfig,
 } from 'mongoose'
 import { uuidv4 } from '@firebase/util'
-import Folder from "./folder";
-import Message from "./message";
+import Folder from './folder'
+import Message from './message'
 
 export interface IFile {
   _id: string
@@ -53,12 +53,12 @@ const fileSchema = new Schema<IFileDocument, IFileDocument>(
 )
 
 fileSchema.pre('deleteOne', { document: true }, async function (next) {
-    try {
-        await Message.findOneAndDelete({ content: this._id })
-        next()
-    } catch (error) {
-        console.log(error)
-    }
+  try {
+    await Message.findOneAndDelete({ content: this._id })
+    next()
+  } catch (error) {
+    console.log(error)
+  }
 })
 
 export default model<IFileDocument, IFileModel>('File', fileSchema)
