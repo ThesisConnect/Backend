@@ -141,7 +141,7 @@ router.post('/create', async (req, res) => {
  *       required: true
  *       content:
  *         application/json:
- *           schema:
+ *            schema:
  *             type: object
  *            properties:
  *               id:
