@@ -49,7 +49,7 @@ router.get('/:id', async (req, res) => {
 /**
  * @swagger
  * /summary/create:
- *   post:
+ *   put:
  *     tags:
  *       - Summary
  *     summary: Create a new summary
