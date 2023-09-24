@@ -93,7 +93,7 @@ router.get('/chat/:id', async (req, res) => {
                 _id: file._id,
                 size: file.size,
                 file_type: file.file_type,
-                lastModified: file.updatedAt?.toString() || '',
+                lastModified: new Date(file.updatedAt?.toString() || ''),
                 link: file.url,
                 memo: file.memo,
               }
