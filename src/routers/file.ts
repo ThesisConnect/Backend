@@ -269,16 +269,20 @@ router.put('/edit', async (req, res) => {
  */
 router.delete('/delete/:id', async (req, res) => {
   try {
-    const id = req.params?.id
-    if (!id) {
+    const id  = req.params?.id;
+    const parent_id = req.query.parent_id;
+
+    if (!id || !parent_id) {
       return res.status(400).send('Bad request')
     }
-
-    const result = await File.findByIdAndDelete(id)
-    if (result) {
-      return res.status(200).send(result)
+    const result_1 = await Folder.findByIdAndUpdate(parent_id, {
+      $pull: { files: id },
+    })
+    const result_2 = await File.findByIdAndDelete(id)
+    if(result_1 && result_2) {
+      return res.status(200).send('OK')
     }
-
+    
     return res.status(404).send('Not found')
   } catch (error) {
     return res.status(500).send(error)
