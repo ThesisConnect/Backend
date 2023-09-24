@@ -140,10 +140,10 @@ router.post('/create', async (req, res) => {
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
- *            schema:
+ *        application/json:
+ *           schema:
  *             type: object
- *            properties:
+ *             properties:
  *               id:
  *                 type: string
  *                 description: ID of the summary
