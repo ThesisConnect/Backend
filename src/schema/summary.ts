@@ -20,3 +20,4 @@ export const editSchema = z.object({
 })
 
 export type createSchema = z.infer<typeof createSchema>
+export type editSchema = z.infer<typeof editSchema>
