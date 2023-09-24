@@ -4,6 +4,7 @@ import file from '../models/file'
 import { createSchema, editSchema } from '../schema/file'
 import Folder from '../models/folder'
 import Message from '../models/message'
+import Chat from '../models/chat'
 
 const router = express.Router()
 
@@ -79,29 +80,47 @@ router.get('/chat/:id', async (req, res) => {
     if (!id) {
       return res.status(400).send('Bad request')
     }
-
-    const files = await Message.find({ chat_id: id, type: 'file' })
-    if (files) {
-      return res.status(200).send(
-        await Promise.all(
-          files.map(async (data) => {
-            const file = await File.findById(data.content)
-            if (file) {
-              return {
-                type: 'file',
-                name: file.name,
-                _id: file._id,
-                size: file.size,
-                file_type: file.file_type,
-                lastModified: new Date(file.updatedAt?.toString() || ''),
-                link: file.url,
-                memo: file.memo,
-              }
-            }
-          }),
-        ),
-      )
+    const chat = await Chat.findById(id)
+    const folder = await Folder.findById(chat?.folder_id)
+    if (folder) {
+      const files = await File.find({ _id: { $in: folder.files } })
+      return res.status(200).send(files.map((file) => {
+        return {
+          type: 'file',
+          _id: file._id,
+          name: file.name,
+          link: file.url,
+          size: file.size,
+          file_type: file.file_type,
+          lastModified: new Date(file.updatedAt?.toString() || ''),
+          memo: file.memo,
+        }
+      }))
     }
+    // const files = await Message.find({ chat_id: id, type: 'file' })
+    // if (files) {
+    //   return res.status(200).send(
+    //     await Promise.all(
+    //       files.map(async (data) => {
+    //         console.log(data.content)
+    //         const file = await File.findById(data.content)
+    //         console.log(file)
+    //         if (file) {
+    //           return {
+    //             type: 'file',
+    //             name: file.name,
+    //             _id: file._id,
+    //             size: file.size,
+    //             file_type: file.file_type,
+    //             lastModified: new Date(file.updatedAt?.toString() || ''),
+    //             link: file.url,
+    //             memo: file.memo,
+    //           }
+    //         }
+    //       }),
+    //     ),
+    //   )
+    // }
 
     return res.status(404).send('Not found')
   } catch (error) {
