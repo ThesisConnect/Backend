@@ -17,6 +17,7 @@ export const editSchema = z.object({
   comment: z.string().optional(),
   status: z.string(),
   progress: z.number(),
+  files: z.array(z.string()).optional(),
 })
 
 export type createSchema = z.infer<typeof createSchema>

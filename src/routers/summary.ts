@@ -179,6 +179,7 @@ router.put('/edit', async (req, res) => {
       comment: editData.data.comment,
       status: editData.data.status,
       progress: editData.data.progress,
+      files: editData.data.files,
     })
 
     if (result) {
