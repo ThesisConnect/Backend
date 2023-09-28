@@ -345,7 +345,7 @@ router.put('/edit', async (req, res) => {
             try {
               const u = await firebaseAdmin.auth().getUserByEmail(email)
               if (!u) {
-                return
+                return 
               }
 
               const us = await user.findById(u.uid)
@@ -378,6 +378,20 @@ router.put('/edit', async (req, res) => {
 
     const co_advisors = await getUIDs(editData.data.co_advisors)
     const advisee = await getUIDs(editData.data.advisee)
+    const project = await Project.findById(editData.data.id)
+
+    for (let user_id of editData.data.advisee) {
+      if (!project?.advisee.includes(user_id)) {
+        const child_folder = await Folder.create({
+          name: 'Private',
+          shared: [user_id],
+          parent: project?.folder_id,
+        })
+        if (!child_folder) {
+          return res.status(500).send('Internal server error')
+        }
+      }
+    }
 
     const result = await Project.findByIdAndUpdate(editData.data.id, {
       name: editData.data.name,
