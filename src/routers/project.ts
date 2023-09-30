@@ -221,10 +221,12 @@ router.post('/create', async (req, res) => {
       child.push(child_folder._id)
     }
 
-    for (let user_id of createData.data.advisee) {
+    const users_id =  await getUIDs(createData.data.advisee)
+
+    for (let user_id of users_id) {
       const child_folder = await Folder.create({
         name: 'Private',
-        shared: [user_id],
+        shared: [ user_id ],
         parent: root_folder,
       })
       if (!child_folder) {
@@ -384,7 +386,7 @@ router.put('/edit', async (req, res) => {
       if (!project?.advisee.includes(user_id)) {
         const child_folder = await Folder.create({
           name: 'Private',
-          shared: [user_id],
+          shared: getUIDs([user_id]),
           parent: project?.folder_id,
         })
         if (!child_folder) {
