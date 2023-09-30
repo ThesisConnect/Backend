@@ -1,11 +1,4 @@
-import {
-  Document,
-  Model,
-  model,
-  Schema,
-  SchemaTimestampsConfig,
-} from 'mongoose'
-import { uuidv4 } from '@firebase/util'
+import { Document, model, Schema } from 'mongoose'
 
 export interface IMessage {
   _id: string
@@ -13,11 +6,14 @@ export interface IMessage {
   user_id: string
   content: string
   type: 'text' | 'file'
+  createdAt: string
+  updatedAt: string
 }
 
-interface IMessageDocument extends IMessage, Document, SchemaTimestampsConfig {
+export interface IMessageDocument extends IMessage, Document {
   _id: string
 }
+
 const messageSchema = new Schema<IMessageDocument, IMessageDocument>({
   _id: {
     type: String,
@@ -40,11 +36,11 @@ const messageSchema = new Schema<IMessageDocument, IMessageDocument>({
     required: true,
   },
   createdAt: {
-    type: Date,
+    type: String,
     required: true,
   },
   updatedAt: {
-    type: Date,
+    type: String,
     required: true,
   },
 })

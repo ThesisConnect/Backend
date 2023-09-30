@@ -32,7 +32,12 @@ const router = express.Router()
  */
 router.get('/:id', async (req, res) => {
   try {
-    const id = req.params?.id
+    const uid = req.user?.uid
+    if (!uid) {
+      return res.status(400).send('Bad request')
+    }
+
+    const id = req.params.id
     if (!id) {
       return res.status(400).send('Bad request')
     }
@@ -42,7 +47,22 @@ router.get('/:id', async (req, res) => {
       child: IFolder[]
       files: IFile[]
       shared: IUser[]
-    }>('parent child files shared')
+    }>([
+      {
+        path: 'parent',
+        match: { shared: { $in: uid } },
+      },
+      {
+        path: 'child',
+        match: { shared: { $in: uid } },
+      },
+      {
+        path: 'files',
+      },
+      {
+        path: 'shared',
+      },
+   ])
     if (folder) {
       return res.status(200).send(folder)
     }
