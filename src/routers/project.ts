@@ -368,6 +368,8 @@ router.put('/edit', async (req, res) => {
       ).filter((id) => id !== undefined)
     }
 
+    console.log(req.body)
+
     const editData = editSchema.safeParse(req.body)
     if (!editData.success) {
       return res.status(400).send('Schema not match')
@@ -382,14 +384,16 @@ router.put('/edit', async (req, res) => {
     const advisee = await getUIDs(editData.data.advisee)
     const project = await Project.findById(editData.data.id)
 
+
     for (let user_id of editData.data.advisee) {
       if (!project?.advisee.includes(user_id)) {
         const child_folder = await Folder.create({
           name: 'Private',
-          shared: getUIDs([user_id]),
+          shared: await getUIDs([user_id]),
           parent: project?.folder_id,
         })
         if (!child_folder) {
+          console.log('Failed to create folder')
           return res.status(500).send('Internal server error')
         }
       }
