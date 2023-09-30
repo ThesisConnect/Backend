@@ -78,7 +78,7 @@ app.get('/', (req: Request, res: Response) => {
 })
 app.use('/auth', authRoute)
 app.use('/test', jwtMiddleware, router)
-app.use('/', router)
+app.use('/', jwtMiddleware,router)
 //next()
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
