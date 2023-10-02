@@ -1,5 +1,6 @@
 import express from 'express'
 import Summary from '../models/summary'
+import Plan from '../models/plan'
 import { createSchema, editSchema } from '../schema/summary'
 
 const router = express.Router()
@@ -108,6 +109,8 @@ router.post('/create', async (req, res) => {
       return res.status(400).send('Body not match')
     }
 
+    console.log(createData.data)
+
     const result = await Summary.create({
       project_id: createData.data.project_id,
       plan_id: createData.data.plan_id,
@@ -121,6 +124,13 @@ router.post('/create', async (req, res) => {
     })
 
     if (result) {
+      if (result.status == "completed") {
+        //console.log("completed")
+        const res_plan = await Plan.findByIdAndUpdate(createData.data.plan_id, {
+          archived: true
+        })
+        //console.log(res_plan)
+      }
       return res.status(200).send(result)
     }
 
