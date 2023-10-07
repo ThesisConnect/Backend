@@ -58,10 +58,33 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // The HTTP methods you want to allow
   credentials: true, // This allows session cookies to be sent and received
 }
+const corsOptions2 = {
+  origin: 'https://site-production-838a.up.railway.app/',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // The HTTP methods you want to allow
+  credentials: true, // This allows session cookies to be sent and received
+}
+const allowedOrigins = [
+  'https://site-production-838a.up.railway.app/',
+  'http://localhost:3000',
+  // other domains
+];
+const corsOptions3 = {
+  origin: function (origin:any, callback:any) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}
+
 
 const app = express()
 const PORT = Number(process.env.PORT || 3000)
-app.use(cors(corsOptions))
+
+app.use(cors(process.env.NODE_ENV === 'production' ? corsOptions : corsOptions3))
 app.use(cookieParser())
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (mongoose.connection.readyState !== 1) {
