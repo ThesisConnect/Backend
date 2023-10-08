@@ -2,7 +2,8 @@ import express from 'express'
 import Project from '../models/project'
 import { createSchema, editSchema } from '../schema/project'
 import Chat from '../models/chat'
-import Folder from '../models/folder'
+import Folder, { IFolder } from '../models/folder'
+import { IFile } from '../models/file'
 import user, { IUser } from '../models/user'
 import firebaseAdmin from '../Authentication/FirebaseAdmin/admin'
 
@@ -383,7 +384,11 @@ router.put('/edit', async (req, res) => {
     const co_advisors = await getUIDs(editData.data.co_advisors)
     const advisee = await getUIDs(editData.data.advisee)
     const project = await Project.findById(editData.data.id)
-
+    const root_folder = await Folder.findById(project?.folder_id)
+    const child_folder = await Folder.find({
+      parent: project?.folder_id
+    })
+    console.log(child_folder)
 
     for (let user_id of editData.data.advisee) {
       if (!project?.advisee.includes(user_id)) {
@@ -398,6 +403,52 @@ router.put('/edit', async (req, res) => {
         }
       }
     }
+
+    // ไปเทสว่าสร้างโฟลเด้อละมันก้อปแชมามั้ย
+
+    
+    for (let user_id of co_advisors) {
+      if (user_id) {
+        continue
+      }
+      if (!root_folder?.shared.includes(user_id? user_id : '')) {
+        await root_folder?.updateOne({
+          $addToSet: { shared: user_id },
+        })
+      }
+    }
+    for (let user_id of advisee){
+      if (user_id) {
+        continue
+      }
+      if (!root_folder?.shared.includes(user_id? user_id : '')) {
+        await root_folder?.updateOne({
+          $addToSet: { shared: user_id },
+        })
+      }
+    }
+
+    for (let user_id of project?.co_advisors? project?.co_advisors : []) {
+      if (user_id) {
+        continue
+      }
+      if (!editData.data.co_advisors.includes(user_id)) {
+        await root_folder?.updateOne({
+          $pull: { shared: user_id },
+        })
+      }
+    }
+    for (let user_id of project?.advisee? project?.advisee : []) {
+      if (user_id) {
+        continue
+      }
+      if (!editData.data.advisee.includes(user_id)) {
+        await root_folder?.updateOne({
+          $pull: { shared: user_id },
+        })
+      }
+    }
+
 
     const result = await Project.findByIdAndUpdate(editData.data.id, {
       name: editData.data.name,
