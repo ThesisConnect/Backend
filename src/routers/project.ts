@@ -366,10 +366,8 @@ router.put('/edit', async (req, res) => {
             }
           }),
         )
-      ).filter((id) => id !== undefined)
+      ).filter((id) => id !== undefined) as string[]
     }
-
-    console.log(req.body)
 
     const editData = editSchema.safeParse(req.body)
     if (!editData.success) {
@@ -385,63 +383,45 @@ router.put('/edit', async (req, res) => {
     const advisee = await getUIDs(editData.data.advisee)
     const project = await Project.findById(editData.data.id)
     const root_folder = await Folder.findById(project?.folder_id)
-    const child_folder = await Folder.find({
-      parent: project?.folder_id
-    })
-    console.log(child_folder)
 
-    for (let user_id of editData.data.advisee) {
-      if (!project?.advisee.includes(user_id)) {
+    if (!project) {
+      return res.status(404).send('Project not found')
+    }
+    if (!root_folder) {
+        return res.status(404).send('Root folder not found')
+    }
+
+    for (let user_id of advisee) {
+      if (project.advisee.includes(user_id)) {
         const child_folder = await Folder.create({
           name: 'Private',
-          shared: await getUIDs([user_id]),
-          parent: project?.folder_id,
+          shared: [user_id],
+          parent: project.folder_id,
         })
         if (!child_folder) {
-          console.log('Failed to create folder')
           return res.status(500).send('Internal server error')
         }
       }
     }
 
-    // ไปเทสว่าสร้างโฟลเด้อละมันก้อปแชมามั้ย
-
-    
-    for (let user_id of co_advisors) {
-      if (user_id) {
-        continue
-      }
-      if (!root_folder?.shared.includes(user_id? user_id : '')) {
-        await root_folder?.updateOne({
-          $addToSet: { shared: user_id },
-        })
-      }
-    }
-    for (let user_id of advisee){
-      if (user_id) {
-        continue
-      }
-      if (!root_folder?.shared.includes(user_id? user_id : '')) {
-        await root_folder?.updateOne({
-          $addToSet: { shared: user_id },
-        })
+    for (const users of [co_advisors, advisee]) {
+      for (let user_id of users) {
+        if (!root_folder.shared.includes(user_id)) {
+          await root_folder.updateOne({
+            $addToSet: { shared: user_id },
+          })
+        }
       }
     }
 
-    for (let user_id of project?.co_advisors? project?.co_advisors : []) {
-      if (user_id) {
-        continue
-      }
+    for (let user_id of project.co_advisors) {
       if (!editData.data.co_advisors.includes(user_id)) {
         await root_folder?.updateOne({
           $pull: { shared: user_id },
         })
       }
     }
-    for (let user_id of project?.advisee? project?.advisee : []) {
-      if (user_id) {
-        continue
-      }
+    for (let user_id of project.advisee) {
       if (!editData.data.advisee.includes(user_id)) {
         await root_folder?.updateOne({
           $pull: { shared: user_id },
