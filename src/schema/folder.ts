@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const createSchema = z.object({
   name: z.string(),
-  parent: z.string().optional(),
+  parent: z.string(),
 })
 
 export const editSchema = z.object({

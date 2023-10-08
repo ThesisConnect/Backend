@@ -111,26 +111,21 @@ router.post('/create', async (req, res) => {
       return res.status(400).send('Body not match')
     }
 
-    let parentFolder: IFolderDocument | null = null
-    const parent = createData.data.parent
-    if (parent) {
-      parentFolder = await Folder.findById(parent)
-      if (!parentFolder) {
-        return res.status(404).send('Parent not found')
-      }
+    const parentFolder = await Folder.findById(createData.data.parent)
+    if (!parentFolder) {
+      return res.status(404).send('Parent not found')
     }
 
     const result = await Folder.create({
       name: createData.data.name,
       parent: createData.data.parent,
+      shared: parentFolder.shared,
     })
 
     if (result) {
-      if (parentFolder) {
-        await parentFolder.updateOne({
-          $addToSet: { child: result._id },
-        })
-      }
+      await parentFolder.updateOne({
+        $addToSet: { child: result._id },
+      })
 
       return res.status(200).send(result)
     }
