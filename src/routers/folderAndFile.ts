@@ -47,37 +47,58 @@ router.put('/move', async (req, res) => {
     }
 
     if (moveData.data.source_type === 'file') {
-      const result_1 = await Folder.findByIdAndUpdate(
-        moveData.data.old_parent,
+      const folder1 = await Folder.findById(moveData.data.old_parent)
+      if (!folder1) {
+        return res.status(404).send('Not found')
+      }
+      const folder2 = await Folder.findById(moveData.data.destination)
+      if (!folder2) {
+        return res.status(404).send('Not found')
+      }
+
+      const result_1 = await folder1.updateOne(
         {
           $pull: { files: moveData.data.source },
-        },
+        }
       )
-      const result_2 = await Folder.findByIdAndUpdate(
-        moveData.data.destination,
+      const result_2 = await folder2.updateOne(
         {
           $addToSet: { files: moveData.data.source },
-        },
+        }
       )
       if (result_1 && result_2) {
         return res.status(200).send('OK')
       }
       return res.status(404).send('Not found')
+
     } else if (moveData.data.source_type === 'folder') {
-      const result_1 = await Folder.findByIdAndUpdate(moveData.data.source, {
-        parent: moveData.data.destination,
-      })
-      const result_2 = await Folder.findByIdAndUpdate(
-        moveData.data.old_parent,
+      const folder1 = await Folder.findById(moveData.data.old_parent)
+      if (!folder1) {
+        return res.status(404).send('Not found')
+      }
+      const folder2 = await Folder.findById(moveData.data.destination)
+      if (!folder2) {
+        return res.status(404).send('Not found')
+      }
+      const folder3 = await Folder.findById(moveData.data.source)
+      if (!folder3) {
+        return res.status(404).send('Not found')
+      }
+
+      const result_1 = await folder3.updateOne(
+        {
+          parent: moveData.data.destination,
+        }
+      )
+      const result_2 = await folder1.updateOne(
         {
           $pull: { child: moveData.data.source },
-        },
+        }
       )
-      const result_3 = await Folder.findByIdAndUpdate(
-        moveData.data.destination,
+      const result_3 = await folder3.updateOne(
         {
           $addToSet: { child: moveData.data.source },
-        },
+        }
       )
       if (result_1 && result_2 && result_3) {
         return res.status(200).send('OK')

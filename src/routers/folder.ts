@@ -179,7 +179,11 @@ router.put('/edit', async (req, res) => {
       return res.status(400).send('Body not match')
     }
 
-    const result = await Folder.findByIdAndUpdate(editData.data.id, {
+    const folder = await Folder.findById(editData.data.id)
+    if (!folder) {
+      return res.status(404).send('Not found')
+    }
+    const result = await folder.updateOne({
       name: editData.data.name,
       shared: editData.data.shared,
     })
