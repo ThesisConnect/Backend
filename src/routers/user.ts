@@ -1,6 +1,8 @@
 import express from 'express'
-import User from '../models/user'
+import User, { IUser } from '../models/user'
 import Project from '../models/project'
+import firebaseAdmin from '../Authentication/FirebaseAdmin/admin'
+
 
 const router = express.Router()
 
@@ -41,6 +43,22 @@ router.get('/:id', async (req, res) => {
     }
 
     return res.status(404).send('Not found')
+  } catch (error) {
+    return res.status(500).send(error)
+  }
+})
+
+router.get('/email/:email', async (req, res) => {
+  try {
+    const u = await firebaseAdmin.auth().getUserByEmail(req.params.email)
+    if (!u) {
+      return res.status(404).send('Firebase Not found')
+    }
+    const user = await User.findById(u.uid)
+    if (!user) {
+      return res.status(404).send('Database Not found')
+    }
+    return res.status(200).send(user)
   } catch (error) {
     return res.status(500).send(error)
   }
