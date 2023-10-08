@@ -4,6 +4,7 @@ import _ from 'lodash'
 import ms from 'ms'
 import admin from '../../Authentication/FirebaseAdmin/admin'
 import isDev from '../../utils/isDev'
+import firebaseAdmin from '../../Authentication/FirebaseAdmin/admin'
 const login = async (req: Request, res: Response) => {
   // console.log(req.body)
   const idToken = req.body.idToken
@@ -40,7 +41,8 @@ const login = async (req: Request, res: Response) => {
     }
 
     res.cookie('session', sessionCookie, options)
-    const sentData = { ...user.toObject(), email, isAuthenticated: true }
+    const customToken = await firebaseAdmin.auth().createCustomToken(uid)
+    const sentData = { ...user.toObject(), customToken,email, isAuthenticated: true }
     return res.status(200).send(_.omit(sentData, ['_id', '__v']))
   } catch (error) {
     res.status(401).send(error || 'UNAUTHORIZED REQUEST!')
