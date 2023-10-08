@@ -75,4 +75,20 @@ folderSchema.pre('deleteOne', { document: true }, async function (next) {
   }
 })
 
+folderSchema.pre('updateOne', { document: true }, async function (next) {
+  try {
+    for (let child_id of this.child) {
+      const childFolder = await Folder.findById(child_id)
+      if (childFolder) {
+        await childFolder.updateOne({ 
+          shared: this.shared
+        })
+      }
+    }
+    next()
+  } catch (error) {
+    console.log(error)
+  }
+})
+
 export default model<IFolderDocument, IFolderModel>('Folder', folderSchema)
