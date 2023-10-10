@@ -9,6 +9,12 @@ import firebaseAdmin from '../Authentication/FirebaseAdmin/admin'
 
 const router = express.Router()
 
+function addToSet(array: any[], elementToAdd: any) {
+  if (!array.includes(elementToAdd)) {
+    array.push(elementToAdd);
+  }
+}
+
 /**
  * @swagger
  * /project/{id}:
@@ -383,6 +389,7 @@ router.put('/edit', async (req, res) => {
     const advisee = await getUIDs(editData.data.advisee)
     const project = await Project.findById(editData.data.id)
     const root_folder = await Folder.findById(project?.folder_id)
+    const child_folders = await Folder.find({ parent: project?.folder_id })
 
     if (!project) {
       return res.status(404).send('Project not found')
@@ -392,7 +399,7 @@ router.put('/edit', async (req, res) => {
     }
 
     for (let user_id of advisee) {
-      if (project.advisee.includes(user_id)) {
+      if (!project.advisee.includes(user_id) && !(child_folders.some((folder) => folder.name == "Private" && folder.shared.includes(user_id)))) {
         const child_folder = await Folder.create({
           name: 'Private',
           shared: [user_id],
@@ -401,31 +408,31 @@ router.put('/edit', async (req, res) => {
         if (!child_folder) {
           return res.status(500).send('Internal server error')
         }
+        await root_folder.updateOne({
+          $addToSet: { child: child_folder._id },
+        })
       }
     }
 
     for (const users of [co_advisors, advisee]) {
       for (let user_id of users) {
         if (!root_folder.shared.includes(user_id)) {
-          await root_folder.updateOne({
-            $addToSet: { shared: user_id },
-          })
+          root_folder.shared.push(user_id)
+          await root_folder.save()
         }
       }
     }
 
     for (let user_id of project.co_advisors) {
       if (!editData.data.co_advisors.includes(user_id)) {
-        await root_folder?.updateOne({
-          $pull: { shared: user_id },
-        })
+        root_folder.shared = root_folder.shared.filter((id) => id != user_id)
+        await root_folder.save()
       }
     }
     for (let user_id of project.advisee) {
       if (!editData.data.advisee.includes(user_id)) {
-        await root_folder?.updateOne({
-          $pull: { shared: user_id },
-        })
+        root_folder.shared = root_folder.shared.filter((id) => id != user_id)
+        await root_folder.save()
       }
     }
 

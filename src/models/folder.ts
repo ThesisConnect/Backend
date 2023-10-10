@@ -75,17 +75,20 @@ folderSchema.pre('deleteOne', { document: true }, async function (next) {
   }
 })
 
-folderSchema.pre('updateOne', { document: true }, async function (next) {
+folderSchema.post("save", { document: true }, async function () {
   try {
+    // console.log("save:", this.name)
     for (let child_id of this.child) {
       const childFolder = await Folder.findById(child_id)
+      // console.log("c:", childFolder?.name)
+      if (childFolder?.name == "Private") {
+        continue
+      }
       if (childFolder) {
-        await childFolder.updateOne({ 
-          shared: this.shared
-        })
+        childFolder.shared = this.shared
+        await childFolder.save()
       }
     }
-    next()
   } catch (error) {
     console.log(error)
   }
