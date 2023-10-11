@@ -157,6 +157,15 @@ router.post('/create', async (req, res) => {
     })
 
     if (result) {
+      const tasks = await Plan.find({
+        project_id: result.project_id,
+        task: true
+      })
+      const completed_tasks = tasks.filter((task) => task.archived == true)
+      const new_progress = (completed_tasks.length / tasks.length) * 100
+      const res_project = await Project.findByIdAndUpdate(result.project_id, {
+        progress: new_progress
+      })
       return res.status(200).send(result)
     }
 
@@ -287,6 +296,15 @@ router.delete('/delete/:id', async (req, res) => {
     const plan = await Plan.findById(id)
     const result = await plan?.deleteOne()
     if (result) {
+      const tasks = await Plan.find({
+        project_id: plan?.project_id,
+        task: true
+      })
+      const completed_tasks = tasks.filter((task) => task.archived == true)
+      const new_progress = ((completed_tasks.length / Math.max(1,tasks.length)) * 100)
+      const res_project = await Project.findByIdAndUpdate(plan?.project_id, {
+        progress: new_progress
+      })
       return res.status(200).send(result)
     }
 

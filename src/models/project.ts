@@ -57,7 +57,7 @@ const projectSchema = new Schema<IProjectDocument, IProjectDocument>(
       },
       name: {
         type: String,
-        default: 'Proposal',
+        default: 'Initiate',
         required: true,
       },
       order: {
