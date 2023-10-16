@@ -2,6 +2,8 @@ import express from 'express'
 import Summary from '../models/summary'
 import Plan from '../models/plan'
 import { createSchema, editSchema } from '../schema/summary'
+import Project from '../models/project'
+import { filter } from 'lodash'
 
 const router = express.Router()
 
@@ -184,7 +186,7 @@ router.put('/edit', async (req, res) => {
     if (!editData.success) {
       return res.status(400).send('Body not match(Zod)')
     }
-
+    
     const result = await Summary.findByIdAndUpdate(editData.data.id, {
       comment: editData.data.comment,
       status: editData.data.status,
@@ -192,7 +194,37 @@ router.put('/edit', async (req, res) => {
       files: editData.data.files,
     })
 
-    if (result) {
+    const updated_result = await Summary.findById(editData.data.id)
+    if (updated_result) {
+      console.log(updated_result.status)
+      if (updated_result.status == "completed") {
+        console.log("completed")
+        const res_plan = await Plan.findByIdAndUpdate(updated_result.plan_id, {
+          archived: true,
+          progress: 100
+        })
+        console.log(res_plan?.name)
+        const tasks = await Plan.find({
+          project_id: updated_result.project_id,
+          task: true
+        })
+        const completed_tasks = tasks.filter((task) => task.archived == true)
+        const new_progress = (completed_tasks.length / tasks.length) * 100
+        const res_project = await Project.findByIdAndUpdate(updated_result.project_id, {
+          progress: new_progress,
+          status: {
+            id: 1,
+            name: res_plan?.name,
+            order: 1
+          }
+        })
+        //console.log(res_plan)
+      } else{
+        const res_plan = await Plan.findByIdAndUpdate(updated_result.plan_id, {
+          archived: false,
+          progress: updated_result.progress
+        })
+      }
       return res.status(200).send(result)
     }
 
