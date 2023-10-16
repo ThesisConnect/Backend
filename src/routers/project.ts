@@ -11,7 +11,7 @@ const router = express.Router()
 
 function addToSet(array: any[], elementToAdd: any) {
   if (!array.includes(elementToAdd)) {
-    array.push(elementToAdd);
+    array.push(elementToAdd)
   }
 }
 
@@ -228,12 +228,12 @@ router.post('/create', async (req, res) => {
       child.push(child_folder._id)
     }
 
-    const users_id =  await getUIDs(createData.data.advisee)
+    const users_id = await getUIDs(createData.data.advisee)
 
     for (let user_id of users_id) {
       const child_folder = await Folder.create({
         name: 'Private',
-        shared: [ user_id ],
+        shared: [user_id],
         parent: root_folder,
       })
       if (!child_folder) {
@@ -346,6 +346,19 @@ router.post('/create', async (req, res) => {
  */
 router.put('/edit', async (req, res) => {
   try {
+    function areArraysEqual(arr1: any[], arr2: any[]): boolean {
+      if (arr1.length !== arr2.length) {
+        return false
+      }
+
+      for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) {
+          return false
+        }
+      }
+
+      return true
+    }
     let cache: Map<string, any> = new Map()
     const getUIDs = async function (emails: string[]) {
       return (
@@ -354,7 +367,7 @@ router.put('/edit', async (req, res) => {
             try {
               const u = await firebaseAdmin.auth().getUserByEmail(email)
               if (!u) {
-                return 
+                return
               }
 
               const us = await user.findById(u.uid)
@@ -395,47 +408,60 @@ router.put('/edit', async (req, res) => {
       return res.status(404).send('Project not found')
     }
     if (!root_folder) {
-        return res.status(404).send('Root folder not found')
+      return res.status(404).send('Root folder not found')
     }
 
-    for (let user_id of advisee) {
-      if (!project.advisee.includes(user_id) && !(child_folders.some((folder) => folder.name == "Private" && folder.shared.includes(user_id)))) {
-        const child_folder = await Folder.create({
-          name: 'Private',
-          shared: [user_id],
-          parent: project.folder_id,
-        })
-        if (!child_folder) {
-          return res.status(500).send('Internal server error')
+    if (
+      !(
+        areArraysEqual(advisors, project.advisors) &&
+        areArraysEqual(co_advisors, project.co_advisors) &&
+        areArraysEqual(advisee, project.advisee)
+      )
+    ) {
+      for (let user_id of advisee) {
+        if (
+          !project.advisee.includes(user_id) &&
+          !child_folders.some(
+            (folder) =>
+              folder.name == 'Private' && folder.shared.includes(user_id),
+          )
+        ) {
+          const child_folder = await Folder.create({
+            name: 'Private',
+            shared: [user_id],
+            parent: project.folder_id,
+          })
+          if (!child_folder) {
+            return res.status(500).send('Internal server error')
+          }
+          await root_folder.updateOne({
+            $addToSet: { child: child_folder._id },
+          })
         }
-        await root_folder.updateOne({
-          $addToSet: { child: child_folder._id },
-        })
       }
-    }
 
-    for (const users of [co_advisors, advisee]) {
-      for (let user_id of users) {
-        if (!root_folder.shared.includes(user_id)) {
-          root_folder.shared.push(user_id)
+      for (const users of [co_advisors, advisee]) {
+        for (let user_id of users) {
+          if (!root_folder.shared.includes(user_id)) {
+            root_folder.shared.push(user_id)
+            await root_folder.save()
+          }
+        }
+      }
+
+      for (let user_id of project.co_advisors) {
+        if (!editData.data.co_advisors.includes(user_id)) {
+          root_folder.shared = root_folder.shared.filter((id) => id != user_id)
+          await root_folder.save()
+        }
+      }
+      for (let user_id of project.advisee) {
+        if (!editData.data.advisee.includes(user_id)) {
+          root_folder.shared = root_folder.shared.filter((id) => id != user_id)
           await root_folder.save()
         }
       }
     }
-
-    for (let user_id of project.co_advisors) {
-      if (!editData.data.co_advisors.includes(user_id)) {
-        root_folder.shared = root_folder.shared.filter((id) => id != user_id)
-        await root_folder.save()
-      }
-    }
-    for (let user_id of project.advisee) {
-      if (!editData.data.advisee.includes(user_id)) {
-        root_folder.shared = root_folder.shared.filter((id) => id != user_id)
-        await root_folder.save()
-      }
-    }
-
 
     const result = await Project.findByIdAndUpdate(editData.data.id, {
       name: editData.data.name,
