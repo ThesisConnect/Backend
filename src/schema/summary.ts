@@ -16,7 +16,7 @@ export const editSchema = z.object({
   project_id: z.string(),
   id: z.string(),
   comment: z.string().optional(),
-  status: z.enum(['pending', 'approve', 'reject', 'completed']),
+  status: z.enum(['pending', 'approved', 'rejected', 'completed']),
   progress: z.number(),
   files: z.array(z.string()).optional(),
 })
