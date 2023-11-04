@@ -411,6 +411,7 @@ router.put('/edit', async (req, res) => {
       return res.status(404).send('Root folder not found')
     }
 
+    let flag = false
     if (
       !(
         areArraysEqual(advisors, project.advisors) &&
@@ -443,24 +444,29 @@ router.put('/edit', async (req, res) => {
       for (const users of [co_advisors, advisee]) {
         for (let user_id of users) {
           if (!root_folder.shared.includes(user_id)) {
+            flag = true
             root_folder.shared.push(user_id)
-            await root_folder.save()
           }
         }
       }
 
       for (let user_id of project.co_advisors) {
         if (!editData.data.co_advisors.includes(user_id)) {
+          flag = true
           root_folder.shared = root_folder.shared.filter((id) => id != user_id)
-          await root_folder.save()
         }
       }
+
       for (let user_id of project.advisee) {
         if (!editData.data.advisee.includes(user_id)) {
+          flag = true
           root_folder.shared = root_folder.shared.filter((id) => id != user_id)
-          await root_folder.save()
         }
       }
+    }
+
+    if (flag) {
+      await root_folder.save()
     }
 
     const result = await Project.findByIdAndUpdate(editData.data.id, {
